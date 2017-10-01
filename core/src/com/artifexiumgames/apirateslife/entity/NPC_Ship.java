@@ -42,6 +42,7 @@ public class NPC_Ship extends Ship {
     protected Ship target;
     protected float range;
     private float angleToTarget;
+    private float projectedAngleToTarget;
     private AI_AGGRESSION_STATE aggro;
     private Color aggro_Color;
 
@@ -84,8 +85,13 @@ public class NPC_Ship extends Ship {
                 passiveAI();
                 break;
         }
+    }
 
-
+    /**
+     * Used only to calculate the proper direction in the next move
+     */
+    private void moveProjection() {
+        super.move();
     }
 
     public void drawAILine(ShapeRenderer shapeRenderer) {
@@ -114,6 +120,25 @@ public class NPC_Ship extends Ship {
         angleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
     }
 
+    private void calculateNextMove(){
+
+        try {
+            NPC_Ship ship = (NPC_Ship) this.clone();
+            ship.moveProjection();
+            Vector2 A = target.getPosition();
+            Vector2 B = ship.getPosition();
+            Vector2 C = ship.getPositionFrontOfShip();
+            float a = Utils.distance(C, B);
+            float b = Utils.distance(C, A);
+            float c = Utils.distance(A, B);
+
+            projectedAngleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void broadSideAI() {
         aggro_Color = aggro.getColor();
         if (angleToTarget < DEGREES_90) {
@@ -140,15 +165,32 @@ public class NPC_Ship extends Ship {
 
     private void chaseAI() {
         aggro_Color = aggro.getColor();
-        if (angleToTarget < 10)
-            dir = Direction.RIGHT;
-        else
-            dir = Direction.LEFT;
+//        if (Math.round(angleToTarget) == 0) {
+//            dir = Direction.STRAIGHT;
+//        }
+//        else if (target.rotation <= DEGREES_180) {
+//            dir = Direction.RIGHT;
+//        }else {
+//            dir = Direction.LEFT;
+//        }
+        if (angleToTarget < 1){
+            dir = Direction.STRAIGHT;
+            return;
+
+        }
+        if (projectedAngleToTarget > angleToTarget){
+            if (dir == Direction.LEFT){
+                dir = Direction.RIGHT;
+            }
+            else {
+                dir = Direction.LEFT;
+            }
+        }
     }
 
     private void attackAI() {
         calculateAngleToTarget();
-
+        calculateNextMove();
         if (range < cannonRange*7/8)
             aggro = AI_AGGRESSION_STATE.BROADSIDE;
         else if (range >= cannonRange)

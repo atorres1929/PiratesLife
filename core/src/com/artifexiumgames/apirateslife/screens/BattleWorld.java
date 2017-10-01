@@ -60,7 +60,7 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         player.getShip().setTargets(npc_ships);
 
         for (Ship ship: npc_ships){
-//            ship.setTarget(player.getShip());
+            ship.setTarget(player.getShip());
         }
         camera = new OrthographicCamera();
         batch = new SpriteBatch();

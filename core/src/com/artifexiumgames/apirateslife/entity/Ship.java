@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.Array;
  * Created 5/24/2016.
  */
 
-public class Ship implements Entity{
+public class Ship implements Entity, Cloneable{
 
     public enum Direction{LEFT, RIGHT, STRAIGHT}
     public enum SailState{FULL, HALF, NONE}
@@ -290,15 +290,7 @@ public class Ship implements Entity{
             else
                 y += distance_Y;
 
-            Rectangle rect = image.getBoundingRectangle();
             hitBox.set(image.getBoundingRectangle());
-
-            Gdx.app.debug(name + " HitBox X:", String.valueOf(rect.x));
-            Gdx.app.debug(name + " HitBox Y:", String.valueOf(rect.y));
-            Gdx.app.debug(name + " HitBox Width:", String.valueOf(rect.width));
-            Gdx.app.debug(name + " HitBox Height:", String.valueOf(rect.height));
-
-
             calculateAimingLines();
         }
     }
