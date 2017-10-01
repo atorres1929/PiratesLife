@@ -11,6 +11,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class Utils {
 
+    public static boolean DEBUG_LINES = true;
+    public static boolean DISABLE_SPLASH = true;
+
     public static BitmapFont corsivaBlack = new BitmapFont(Gdx.files.internal("fonts/corsiva_black.fnt"));
     public static BitmapFont corsivaWhite = new BitmapFont(Gdx.files.internal("fonts/corsiva_white.fnt"));
     public static BitmapFont corsivaTitleWhite = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_white.fnt"));
@@ -112,12 +115,6 @@ public class Utils {
 
     public static void refreshVieport(Viewport viewport){
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    }
-    public static void print(Object s){
-        Gdx.app.log("Logged", s.toString());
-    }
-    public static void print(Object tag, Object s){
-        Gdx.app.log(tag.toString(), s.toString());
     }
 
 

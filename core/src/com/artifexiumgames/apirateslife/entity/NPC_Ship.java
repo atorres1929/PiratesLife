@@ -2,11 +2,13 @@ package com.artifexiumgames.apirateslife.entity;
 
 import com.artifexiumgames.apirateslife.item.CannonType;
 import com.artifexiumgames.apirateslife.utils.Utils;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Logger;
 
 /**
  * Created by Adam on 5/19/2016.
@@ -88,7 +90,8 @@ public class NPC_Ship extends Ship {
 
     public void drawAILine(ShapeRenderer shapeRenderer) {
         shapeRenderer.line(this.getCenterPosition(), target.getCenterPosition());
-        if (debug == true) {
+
+        if (Utils.DEBUG_LINES) {
             shapeRenderer.setColor(Color.RED);
             Rectangle rect = getHitBox();
             shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
@@ -97,6 +100,7 @@ public class NPC_Ship extends Ship {
             shapeRenderer.line(forwardAimingLine.getPos1(), forwardAimingLine.getPos2());
             shapeRenderer.line(backwardAimingLine.getPos1(), backwardAimingLine.getPos2());
         }
+
     }
 
     private void calculateAngleToTarget() {

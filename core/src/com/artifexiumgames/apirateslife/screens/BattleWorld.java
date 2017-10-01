@@ -57,10 +57,10 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         npc_ships.add(new NPC_Ship("Gunboat", Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
                 CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()+500,player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
 
-        player.getShip().setEnemies(npc_ships);
+        player.getShip().setTargets(npc_ships);
 
         for (Ship ship: npc_ships){
-            ship.setEnemy(player.getShip());
+//            ship.setTarget(player.getShip());
         }
         camera = new OrthographicCamera();
         batch = new SpriteBatch();
@@ -72,11 +72,6 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         viewport = new FillViewport(WORLD_SIZE, WORLD_SIZE, camera);
         camera.zoom = STARTING_ZOOM;
         gameState = GameState.RUNNING;
-
-        //DEBUG
-        for (NPC_Ship npc_ship: battle.getNPCShips()){
-            npc_ship.setDebug(true);
-        }
 
     }
 

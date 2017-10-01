@@ -6,6 +6,7 @@ import com.artifexiumgames.apirateslife.item.CannonType;
 import com.artifexiumgames.apirateslife.screens.BattleWorld;
 import com.artifexiumgames.apirateslife.utils.Line;
 import com.artifexiumgames.apirateslife.utils.Utils;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,6 +24,7 @@ public class Ship implements Entity{
     public enum Direction{LEFT, RIGHT, STRAIGHT}
     public enum SailState{FULL, HALF, NONE}
     public enum ShipType{GUNBOAT, BRIGANTINE}
+    public final ShipType SHIP_TYPE;
 
     protected final float DEGREES_360 = 360;
     protected final float DEGREES_270 = 270;
@@ -37,7 +39,7 @@ public class Ship implements Entity{
 
     protected Rectangle hitBox;
     protected Array<CannonShot> cannonShots;
-    protected Array<Ship> enemies;
+    protected Array<Ship> targets;
     protected CannonType cannonType;
     protected CannonShot.CannonShotType loadedShot;
     protected final int MAX_CANNONS_LEFT, MAX_CANNONS_RIGHT, MAX_CANNONS_FRONT, MAX_CANNONS_BACK;
@@ -60,7 +62,6 @@ public class Ship implements Entity{
     protected float x, y;
     protected float rotation;
     protected boolean dead;
-    protected boolean debug;
 
     private FadeInFadeOutEffectArea sinkingSmoke;
     private FadeOutEffect sinkingFadingAway;
@@ -97,6 +98,7 @@ public class Ship implements Entity{
                 sails = MAX_SAILS;
                 image = new Sprite(new Texture("ships/gunboat.png"));
                 numSinkingClouds = 5;
+                SHIP_TYPE = ShipType.GUNBOAT;
                 break;
             case BRIGANTINE:
                 MAX_CANNONS_LEFT = 1;
@@ -112,6 +114,7 @@ public class Ship implements Entity{
                 sails = MAX_SAILS;
                 image = new Sprite(new Texture("ships/brigantine.png"));
                 numSinkingClouds = 30;
+                SHIP_TYPE = ShipType.BRIGANTINE;
                 break;
             default:
                 MAX_CANNONS_LEFT = 0;
@@ -123,6 +126,7 @@ public class Ship implements Entity{
                 MAX_SAILS = 0;
                 MAX_SPEED = 0;
                 image = null;
+                SHIP_TYPE = null;
                 break;
         }
         dead = false;
@@ -152,7 +156,7 @@ public class Ship implements Entity{
         image.setRotation(rotation);
         cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
         cannonShots = new Array<CannonShot>();
-        enemies = new Array<Ship>();
+        targets = new Array<Ship>();
         hitBox = image.getBoundingRectangle();
         rightAimingLine = new Line();
         leftAimingLine = new Line();
@@ -212,9 +216,9 @@ public class Ship implements Entity{
                 cannonShots.removeValue(cannonShot, false);
             }
             else{
-                for (Ship enemy: enemies){
-                    if (enemy.getHitBox().contains(cannonShot.getHitBox())) {
-                        enemy.hit(cannonShot, cannonType, enemy);
+                for (Ship target: targets){
+                    if (target.getHitBox().contains(cannonShot.getHitBox())) {
+                        target.hit(cannonShot, cannonType, target);
                         cannonShot.disposeTextures();
                         cannonShots.removeValue(cannonShot, false);
                     }
@@ -224,14 +228,14 @@ public class Ship implements Entity{
         }
     }
 
-    protected void hit(CannonShot cannonShot, CannonType cannonType, Ship enemy){
+    protected void hit(CannonShot cannonShot, CannonType cannonType, Ship target){
         float hullDamage;
         float sailDamage;
         hullDamage = cannonType.getDamage()*cannonShot.getHullDamage();
         sailDamage = cannonType.getDamage()*cannonShot.getSailDamage();
 
-        enemy.hull -= hullDamage;
-        enemy.sails -= sailDamage;
+        target.hull -= hullDamage;
+        target.sails -= sailDamage;
     }
 
     @Override
@@ -251,16 +255,25 @@ public class Ship implements Entity{
             }
             switch (sailState) {
                 case FULL:
-                    speed = MAX_SPEED;
+                    if (speed < MAX_SPEED){
+                        speed+=0.01f;
+                    }
                     break;
                 case HALF:
-                    speed = MAX_SPEED / 2;
+                    if (speed > MAX_SPEED / 2) {
+                        speed-=0.01f;
+                    }
+                    else if (speed < MAX_SPEED / 2){
+                        speed+=0.01f;
+                    }
                     break;
                 case NONE:
-                    speed = 0;
+                    if (speed > 0){
+                        speed-=0.01f;
+                    }
                     break;
             }
-            ensureInWorld();
+            ensureWithinBorders();
 
             double scale_X = Math.sin(Math.abs(rotation * Math.PI / DEGREES_180));
             double scale_Y = Math.cos(Math.abs(rotation * Math.PI / DEGREES_180));
@@ -280,21 +293,20 @@ public class Ship implements Entity{
             Rectangle rect = image.getBoundingRectangle();
             hitBox.set(image.getBoundingRectangle());
 
-            if (debug == true) {
-                Utils.print(name + " HitBox X:", rect.x);
-                Utils.print(name + " HitBox Y:", rect.y);
-                Utils.print(name + " HitBox Width:", rect.width);
-                Utils.print(name + " HitBox Height:", rect.height);
-            }
+            Gdx.app.debug(name + " HitBox X:", String.valueOf(rect.x));
+            Gdx.app.debug(name + " HitBox Y:", String.valueOf(rect.y));
+            Gdx.app.debug(name + " HitBox Width:", String.valueOf(rect.width));
+            Gdx.app.debug(name + " HitBox Height:", String.valueOf(rect.height));
+
 
             calculateAimingLines();
         }
     }
 
     /**
-     * Ensures the ship is still in the world, and if not, places is back in the world with it's rotation reversed.
+     * Ensures the ship is still in the borders of the map, and if not, places is back in the borders with it's rotation reversed.
      */
-    private void ensureInWorld(){
+    private void ensureWithinBorders(){
         if (x > BattleWorld.WORLD_SIZE-imageWidth) {
             rotation += DEGREES_180;
             x -= 10;
@@ -423,9 +435,9 @@ public class Ship implements Entity{
         this.dir = dir;
     }
 
-    public void setEnemies(Array<Ship> enemies){this.enemies = enemies;}
+    public void setTargets(Array<Ship> targets){this.targets = targets;}
 
-    public void setEnemy(Ship enemy){this.enemies.add(enemy);}
+    public void setTarget(Ship target){this.targets.add(target);}
 
     public void setHull(float hull){this.hull = hull;}
 
@@ -494,14 +506,6 @@ public class Ship implements Entity{
         image.getTexture().dispose();
         smoke.getTexture().dispose();
         sinkingSmoke.dispose();
-    }
-
-    /**
-     * Sets whether the debug features will be displayed
-     * @param debug set to true for viewing debug, false for hiding debug
-     */
-    public void setDebug(boolean debug){
-        this.debug = debug;
     }
 
 }
