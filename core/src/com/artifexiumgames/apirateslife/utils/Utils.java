@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class Utils {
 
-    public static boolean DEBUG_LINES = true;
+    public static boolean DEBUG_LINES = false;
     public static boolean DISABLE_SPLASH = true;
 
     public static BitmapFont corsivaBlack = new BitmapFont(Gdx.files.internal("fonts/corsiva_black.fnt"));

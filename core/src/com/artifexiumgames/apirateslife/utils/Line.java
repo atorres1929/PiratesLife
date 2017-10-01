@@ -2,9 +2,7 @@ package com.artifexiumgames.apirateslife.utils;
 
 import com.badlogic.gdx.math.Vector2;
 
-/**
- * Created by Adam on 6/15/2016.
- */
+
 public class Line {
 
     public float x1, y1, x2, y2;

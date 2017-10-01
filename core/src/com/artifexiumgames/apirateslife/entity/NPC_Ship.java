@@ -146,37 +146,27 @@ public class NPC_Ship extends Ship {
         } else if (angleToTarget >= DEGREES_90) {
             dir = Direction.LEFT;
         }
-        if (angleToTarget > DEGREES_90 - 5 || angleToTarget < DEGREES_90 + 5) {
-            if (Utils.lineIntersectsRectangle(leftAimingLine, target.getHitBox())){
-                fireLeftCannons();
-            }
-            else if (Utils.lineIntersectsRectangle(rightAimingLine, target.getHitBox())){
-                fireRightCannons();
-            }
-            else if (Utils.lineIntersectsRectangle(forwardAimingLine, target.getHitBox())){
-                fireForwardCannons();
-            }
-            else if (Utils.lineIntersectsRectangle(backwardAimingLine, target.getHitBox())){
-                fireBackCannons();
-            }
+        if (Utils.lineIntersectsRectangle(leftAimingLine, target.getHitBox())){
+            fireLeftCannons();
+        }
+        else if (Utils.lineIntersectsRectangle(rightAimingLine, target.getHitBox())){
+            fireRightCannons();
+        }
+        else if (Utils.lineIntersectsRectangle(backwardAimingLine, target.getHitBox())){
+            fireBackCannons();
         }
 
     }
 
     private void chaseAI() {
         aggro_Color = aggro.getColor();
-//        if (Math.round(angleToTarget) == 0) {
-//            dir = Direction.STRAIGHT;
-//        }
-//        else if (target.rotation <= DEGREES_180) {
-//            dir = Direction.RIGHT;
-//        }else {
-//            dir = Direction.LEFT;
-//        }
         if (angleToTarget < 1){
             dir = Direction.STRAIGHT;
             return;
 
+        }
+        if (Utils.lineIntersectsRectangle(forwardAimingLine, target.getHitBox())){
+            fireForwardCannons();
         }
         if (projectedAngleToTarget > angleToTarget){
             if (dir == Direction.LEFT){
