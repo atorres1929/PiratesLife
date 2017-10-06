@@ -79,6 +79,7 @@ project(":android") {
 project(":core") {
     apply plugin: "java"
 
+    sourceSets.test.java.srcDirs = ["test/"]
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
@@ -87,6 +88,10 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
 		compile fileTree(dir: '../libs', include: '*.jar')
+
+        //Test dependencies
+        testCompile "junit:junit:4.12"
+
     }
 }
 
