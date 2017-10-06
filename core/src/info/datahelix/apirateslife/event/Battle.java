@@ -20,6 +20,7 @@ package info.datahelix.apirateslife.event;
 import info.datahelix.apirateslife.entity.NPC_Ship;
 import info.datahelix.apirateslife.entity.Player;
 import info.datahelix.apirateslife.entity.Ship;
+import info.datahelix.apirateslife.utils.Utils;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -59,8 +60,13 @@ public class Battle {
 
     public void drawShapes(ShapeRenderer renderer){
         for (NPC_Ship npc_ship: npc_ships) {
-            renderer.setColor(npc_ship.getAggro_Color());
             npc_ship.drawAILine(renderer);
+        }
+        if (Utils.DEBUG_LINES){
+            for (NPC_Ship npc_ship: npc_ships){
+                npc_ship.drawDebugLines(renderer);
+            }
+            playerShip.drawDebugLines(renderer);
         }
     }
 

@@ -23,9 +23,14 @@ import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.utils.Line;
 import info.datahelix.apirateslife.utils.Utils;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -145,7 +150,7 @@ public class Ship implements Entity, Cloneable{
                 break;
         }
         dead = false;
-        sailState = SailState.FULL;
+        sailState = SailState.NONE;
         MAX_CANNONS = MAX_CANNONS_BACK+MAX_CANNONS_FRONT+MAX_CANNONS_RIGHT+MAX_CANNONS_LEFT;
         cannonsLeft = MAX_CANNONS_LEFT;
         cannonsRight = MAX_CANNONS_RIGHT;
@@ -204,7 +209,7 @@ public class Ship implements Entity, Cloneable{
             }
         }
 
-        Utils.corsivaTitleBlack.draw(batch, ""+hull, x, y);
+        new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt")).draw(batch, ""+hull, x, y);
 
         if (hull <= 0){
             sinkingFadingAway.animate(batch, Utils.DELTA);
@@ -213,9 +218,17 @@ public class Ship implements Entity, Cloneable{
             if (sinkingSmoke.done()){
                 this.dead = true;
             }
-
         }
+    }
 
+    public void drawDebugLines(ShapeRenderer shapeRenderer){
+        shapeRenderer.setColor(Color.RED);
+        Rectangle rect = getHitBox();
+        shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        shapeRenderer.line(rightAimingLine.getPos1(), rightAimingLine.getPos2());
+        shapeRenderer.line(leftAimingLine.getPos1(), leftAimingLine.getPos2());
+        shapeRenderer.line(forwardAimingLine.getPos1(), forwardAimingLine.getPos2());
+        shapeRenderer.line(backwardAimingLine.getPos1(), backwardAimingLine.getPos2());
     }
 
     /**

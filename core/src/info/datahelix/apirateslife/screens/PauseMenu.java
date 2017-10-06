@@ -23,6 +23,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -60,9 +61,9 @@ public class PauseMenu implements Screen{
         textButtonStyle.down = skin.getDrawable("button.down");
         textButtonStyle.pressedOffsetX = 1;
         textButtonStyle.pressedOffsetY = -1;
-        textButtonStyle.font = Utils.corsivaBlack;
+        textButtonStyle.font = new BitmapFont(Gdx.files.internal("fonts/corsiva_black.fnt"));
 
-        Label label = new Label("Pause", new Label.LabelStyle(Utils.corsivaTitleWhite, Color.WHITE));
+        Label label = new Label("Pause", new Label.LabelStyle(new BitmapFont(Gdx.files.internal("fonts/corsiva_title_white.fnt")), Color.WHITE));
         final String[] buttonNames = new String[]{"Continue Battle", "Options", "Exit Game"};
         final TextButton[] textButtons = new TextButton[buttonNames.length];
         for (int i = 0; i < textButtons.length; i++){

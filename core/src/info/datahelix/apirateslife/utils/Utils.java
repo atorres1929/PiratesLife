@@ -29,13 +29,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class Utils {
 
-    public static boolean DEBUG_LINES = false;
+    public static boolean DEBUG_LINES = true;
     public static boolean DISABLE_SPLASH = true;
 
-    public static BitmapFont corsivaBlack = new BitmapFont(Gdx.files.internal("fonts/corsiva_black.fnt"));
-    public static BitmapFont corsivaWhite = new BitmapFont(Gdx.files.internal("fonts/corsiva_white.fnt"));
-    public static BitmapFont corsivaTitleWhite = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_white.fnt"));
-    public static BitmapFont corsivaTitleBlack = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt"));
     public static float DELTA = 0;
     public static int DEFAULT_BUTTON_PAD = 20;
 
@@ -83,14 +79,15 @@ public class Utils {
      */
     public static Vector2 rotatePoint(float cx, float cy, float angle, Vector2 p){
         //Get the sin and cosine of the angle
-        float s = (float) Math.sin(angle);
-        float c = (float) Math.cos(angle);
+        angle = 360 - angle;
+        float s = (float) Math.sin(Math.toRadians(angle));
+        float c = (float) Math.cos(Math.toRadians(angle));
         //translate point back to origin
         p.x -= cx;
         p.y -= cy;
         //rotate point
-        float xnew = p.x * c + p.y * s;
-        float ynew = p.x * s - p.y * c;
+        float xnew = p.x * c - p.y * s;
+        float ynew = p.x * s + p.y * c;
         //translate point back
         p.x = xnew + cx;
         p.y = ynew + cy;

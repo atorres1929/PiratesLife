@@ -70,10 +70,6 @@ public class NPC_Ship extends Ship {
         range = Utils.distance(this.x, this.y, target.x, target.y);
     }
 
-    public Color getAggro_Color() {
-        return aggro_Color;
-    }
-
     @Override
     public void move() {
         super.move();
@@ -111,18 +107,8 @@ public class NPC_Ship extends Ship {
     }
 
     public void drawAILine(ShapeRenderer shapeRenderer) {
+        shapeRenderer.setColor(aggro_Color);
         shapeRenderer.line(this.getCenterPosition(), target.getCenterPosition());
-
-        if (Utils.DEBUG_LINES) {
-            shapeRenderer.setColor(Color.RED);
-            Rectangle rect = getHitBox();
-            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            shapeRenderer.line(rightAimingLine.getPos1(), rightAimingLine.getPos2());
-            shapeRenderer.line(leftAimingLine.getPos1(), leftAimingLine.getPos2());
-            shapeRenderer.line(forwardAimingLine.getPos1(), forwardAimingLine.getPos2());
-            shapeRenderer.line(backwardAimingLine.getPos1(), backwardAimingLine.getPos2());
-        }
-
     }
 
     private void calculateAngleToTarget() {

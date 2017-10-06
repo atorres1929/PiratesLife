@@ -27,6 +27,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -69,7 +70,7 @@ public class MainMenu implements Screen{
         textButtonStyle.down = skin.getDrawable("button.down");
         textButtonStyle.pressedOffsetX = 1;
         textButtonStyle.pressedOffsetY = -1;
-        textButtonStyle.font = Utils.corsivaBlack;
+        textButtonStyle.font = new BitmapFont(Gdx.files.internal("fonts/corsiva_black.fnt"));
         newGame = new TextButton("New Game", textButtonStyle);
         newGame.pad(Utils.DEFAULT_BUTTON_PAD);
         newGame.addListener(new ClickListener() {
