@@ -15,7 +15,7 @@ android {
         instrumentTest.setRoot('tests')
     }
     defaultConfig {
-        applicationId "com.artifexiumgames.apirateslife"
+        applicationId "info.datahelix.apirateslife"
         minSdkVersion 8
         targetSdkVersion 20
     }
@@ -68,7 +68,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.artifexiumgames.apirateslife/com.artifexiumgames.apirateslife.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'info.datahelix.apirateslife/AndroidLauncher'
 }
 
 // sets up the Android Eclipse project, using the old Ant based build.
