@@ -73,9 +73,8 @@ public class CannonShot implements Entity{
     private static final float grapeShotSailDamage = .10f;
     private static final float bombShotHullDamage = 2f;
     private static final float bombShotSailDamage = .75f;
-    private final int speed = 30;
+    private final int speed = 10;
     private float x,y,rotation;
-    private Rectangle hitBox;
     private float range;
     private float imageRotation;
     private CannonShotType cannonShotType;
@@ -111,7 +110,6 @@ public class CannonShot implements Entity{
         this.imageRotation = 0;
         this.cannonShotType = type;
         this.image.setOriginCenter();
-        this.hitBox = image.getBoundingRectangle();
         image.setPosition(x,y);
         image.setRotation(rotation);
     }
@@ -140,11 +138,9 @@ public class CannonShot implements Entity{
 
         imageRotation+=5;
         range += Utils.distance(0, 0, distance_X, distance_Y);
-        Rectangle rect = image.getBoundingRectangle();
-        hitBox.set(rect.x, rect.y, rect.width, rect.height);
     }
 
-    public Rectangle getHitBox(){return hitBox;}
+    public Rectangle getHitBox(){return image.getBoundingRectangle();}
 
     public CannonShotType getCannonShotType(){return cannonShotType;}
 

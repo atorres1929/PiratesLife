@@ -19,6 +19,7 @@ package com.artifexiumgames.apirateslife.entity;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -100,4 +101,10 @@ public interface Entity {
      * batch can be null if no SpriteBatch is needed for animation
      */
     void disposeTextures();
+
+    /**
+     * Gives the hit box of the entity based upon it's sprite
+     * @return the hit box of the entity
+     */
+    Rectangle getHitBox();
 }

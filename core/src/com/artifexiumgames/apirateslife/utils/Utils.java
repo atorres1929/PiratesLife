@@ -73,6 +73,30 @@ public class Utils {
 
     //MATH
 
+    /**
+     * Rotate a point p around pivot point (cx,cy)
+     * @param cx x of the pivot point
+     * @param cy y of the pivot point
+     * @param angle the angle which the point must be rotated according to
+     * @param p the point to be rotated
+     * @return a rotated point around (cx, cy) given point p
+     */
+    public static Vector2 rotatePoint(float cx, float cy, float angle, Vector2 p){
+        //Get the sin and cosine of the angle
+        float s = (float) Math.sin(angle);
+        float c = (float) Math.cos(angle);
+        //translate point back to origin
+        p.x -= cx;
+        p.y -= cy;
+        //rotate point
+        float xnew = p.x * c + p.y * s;
+        float ynew = p.x * s - p.y * c;
+        //translate point back
+        p.x = xnew + cx;
+        p.y = ynew + cy;
+        return p;
+    }
+
     public static float distance(float x1, float y1, float x2, float y2){
         return (float) Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
     }

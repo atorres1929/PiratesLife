@@ -19,6 +19,7 @@ package com.artifexiumgames.apirateslife.entity;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -73,6 +74,11 @@ public class Person implements Entity{
     }
 
     public void setDirection(Direction dir){this.dir = dir;}
+
+    @Override
+    public Rectangle getHitBox(){
+        return image.getBoundingRectangle();
+    }
 
     @Override
     public Sprite getSprite() {

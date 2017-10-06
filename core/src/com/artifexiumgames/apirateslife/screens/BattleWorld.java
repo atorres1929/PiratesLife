@@ -70,10 +70,10 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private Viewport viewport;
     public BattleWorld(Player player){
         Array<Ship> npc_ships = new Array<Ship>();
-        npc_ships.add(new NPC_Ship("Brigantine", Ship.ShipType.BRIGANTINE, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()-500,player.getShip().getY(), 0, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
-        npc_ships.add(new NPC_Ship("Gunboat", Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()+500,player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+//        npc_ships.add(new NPC_Ship("HMS Victory", Ship.ShipType.BRIGANTINE, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
+//                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()-500,player.getShip().getY(), 0, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+//        npc_ships.add(new NPC_Ship("HMS Tiny", Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
+//                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()+500,player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
 
         player.getShip().setTargets(npc_ships);
 

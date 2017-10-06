@@ -20,14 +20,15 @@ package com.artifexiumgames.apirateslife.effect;
 import com.artifexiumgames.apirateslife.entity.Entity;
 import com.artifexiumgames.apirateslife.utils.SpriteAccessor;
 import com.artifexiumgames.apirateslife.utils.Utils;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import aurelienribon.tweenengine.TweenManager;
-import com.badlogic.gdx.graphics.Texture;
+
 import java.util.Random;
 
 import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenManager;
 
 /**
  * This class is for creating an area effect of many sprites fading in and fading out around an entity.

@@ -77,7 +77,7 @@ public class MainMenu implements Screen{
             public void clicked(InputEvent event, float x, float y){
                 ((Game) Gdx.app.getApplicationListener()).getScreen().dispose();
                 ((Game) Gdx.app.getApplicationListener()).setScreen(new BattleWorld(new Player("Player",
-                        new Ship("Player Ship",Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.THIRTYTWO_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
+                        new Ship("Player Ship",Ship.ShipType.BRIGANTINE, new CannonType(CannonType.CannonWeightType.THIRTYTWO_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
                                 CannonShot.CannonShotType.ROUNDSHOT, BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
             }
         });
