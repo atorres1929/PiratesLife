@@ -34,5 +34,20 @@ public class TestUtils {
     public void testPointRotation4(){
         Assert.assertEquals(new Vector2(4, 0), Utils.rotatePoint(4, 4, -180, new Vector2(4,8)));
     }
+
+    @Test
+    public void testPointRotation5(){
+        Assert.assertEquals(new Vector2(4, 8), Utils.rotatePoint(4, 8, 360, new Vector2(4, 8)));
+    }
+
+    @Test
+    public void testPointRotation6(){
+        Assert.assertEquals(new Vector2(4, 8), Utils.rotatePoint(4, 8, -360, new Vector2(4, 8)));
+    }
+
+    @Test
+    public void testPointRotation7(){
+        Assert.assertEquals(new Vector2(4, 8), Utils.rotatePoint(4, 8, -720, new Vector2(4, 8)));
+    }
 }
 
