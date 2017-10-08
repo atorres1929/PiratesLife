@@ -49,8 +49,8 @@ public class FadeOutEffect extends Effect {
     }
 
 
-    public FadeOutEffect(Sprite sprite, int timeToFade, int delayToFade, float x, float y){
-        this.sprite = sprite;
+    public FadeOutEffect(Sprite s, int timeToFade, int delayToFade, float x, float y){
+        sprite = new Sprite(s.getTexture());
         sprite.setPosition(x, y);
         Tween.set(sprite, SpriteAccessor.ALPHA).target(1).start(tweenManager);
         Tween.to(sprite, SpriteAccessor.ALPHA, timeToFade).target(0).delay(delayToFade).start(tweenManager);
@@ -75,12 +75,4 @@ public class FadeOutEffect extends Effect {
 
     public Sprite getSprite(){return sprite;}
 
-    /**
-     * This method is left empty and unused in this child class because disposing of the entity's
-     * sprite should be handled by the entity class itself.
-     */
-    @Override
-    public void dispose() {
-
-    }
 }

@@ -90,23 +90,14 @@ public class FadeInFadeOutEffectArea extends Effect {
 
             Vector2 spritePosition = new Vector2(spriteArray[i].getOriginX(), spriteArray[i].getOriginY());
             float distance = Utils.distance(spritePosition, focusedEntity.getCenterPosition());
-            if (distance > DISTANCE_FROM_ENTITY && spriteArray[i].getColor().a < ALPHA_BEFORE_REPOSITION) {
 
+            if (distance > DISTANCE_FROM_ENTITY && spriteArray[i].getColor().a < ALPHA_BEFORE_REPOSITION) {
                 float position1 = random.nextInt(DISTANCE_FROM_ENTITY)+ focusedEntity.getCenterX()-random.nextInt(DISTANCE_FROM_ENTITY);
                 float position2 = random.nextInt(DISTANCE_FROM_ENTITY)+ focusedEntity.getCenterY()-random.nextInt(DISTANCE_FROM_ENTITY);
                 spriteArray[i].setPosition(position1, position2);
             }
+
             spriteArray[i].draw(batch);
         }
-    }
-
-    /**
-     * Disposes the texture used in the animation
-     * @see Texture
-     * @see Sprite
-     */
-    public void dispose(){
-        for (Sprite sprite: spriteArray)
-            sprite.getTexture().dispose();
     }
 }

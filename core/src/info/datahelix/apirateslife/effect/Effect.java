@@ -64,9 +64,4 @@ public abstract class Effect {
 
     public boolean done(){return tweenManager.getRunningTweensCount() == 0;}
 
-    /**
-     * Disposes all disposable attributes of the Effect
-     */
-    public abstract void dispose();
-
 }

@@ -60,6 +60,7 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private GameState gameState;
     private Battle battle;
     private Sprite runningBackground;
+    private Sprite wave;
     private FadeInFadeOutEffectArea waves;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
@@ -82,7 +83,8 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         battle = new Battle(player, npc_ships, camera, batch);
         shapeRenderer = new ShapeRenderer();
         runningBackground = new Sprite(new Texture("backgrounds/sea.png"));
-        waves = new FadeInFadeOutEffectArea(battle.getPlayerShip(), new Sprite(new Texture("effects/ocean/wave.png")), WAVE_FADE_DELAY, EFFECT_MAX_DISTANCE_FROM_SHIP, WAVE_NUMBER, Tween.INFINITY); //The animation will go on forever (Tween.INFINITY)
+        wave = new Sprite(new Texture("effects/ocean/wave.png"));
+        waves = new FadeInFadeOutEffectArea(battle.getPlayerShip(), wave, WAVE_FADE_DELAY, EFFECT_MAX_DISTANCE_FROM_SHIP, WAVE_NUMBER, Tween.INFINITY); //The animation will go on forever (Tween.INFINITY)
         runningBackground.setSize(WORLD_SIZE, WORLD_SIZE);
         viewport = new FillViewport(WORLD_SIZE, WORLD_SIZE, camera);
         camera.zoom = STARTING_ZOOM;
@@ -149,9 +151,9 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     @Override
     public void dispose() {
         batch.dispose();
-        waves.dispose();
+        wave.getTexture().dispose();
         runningBackground.getTexture().dispose();
-        battle.disposeTextures();
+        battle.disposeNPC_Textures();
         shapeRenderer.dispose();
     }
 

@@ -86,7 +86,7 @@ public class Battle {
         camera.update();
     }
 
-    public void disposeTextures(){
+    public void disposeNPC_Textures(){
         for (NPC_Ship npc_ship: npc_ships)
             npc_ship.disposeTextures();
     }

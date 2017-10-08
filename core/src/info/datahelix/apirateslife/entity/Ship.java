@@ -17,13 +17,6 @@
 
 package info.datahelix.apirateslife.entity;
 
-import info.datahelix.apirateslife.effect.FadeOutEffect;
-import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
-import info.datahelix.apirateslife.item.CannonType;
-import info.datahelix.apirateslife.screens.BattleWorld;
-import info.datahelix.apirateslife.utils.Line;
-import info.datahelix.apirateslife.utils.Utils;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -34,6 +27,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+
+import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
+import info.datahelix.apirateslife.effect.FadeOutEffect;
+import info.datahelix.apirateslife.item.CannonType;
+import info.datahelix.apirateslife.screens.BattleWorld;
+import info.datahelix.apirateslife.utils.Line;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/24/2016
@@ -70,8 +70,9 @@ public class Ship implements Entity, Cloneable{
     protected SailState sailState;
     protected Direction dir;
     protected int cannonsLeft, cannonsRight, cannonsForward, cannonsBack;
-    protected Line leftAimingLine, rightAimingLine, forwardAimingLine, backwardAimingLine;
     protected long reloadTimerForward, reloadTimerBack, reloadTimerLeft, reloadTimerRight;
+    protected int reloadTime;
+    protected Line leftAimingLine, rightAimingLine, forwardAimingLine, backwardAimingLine;
     protected float cannonRange;
     protected String name;
     protected int crew;
@@ -85,6 +86,7 @@ public class Ship implements Entity, Cloneable{
     private FadeInFadeOutEffectArea sinkingSmoke;
     private FadeOutEffect sinkingFadingAway;
     private Array<FadeOutEffect> cannonSmokes;
+    private BitmapFont healthDisplay;
     private int numSinkingClouds;
     private final int SINKING_CLOUD_DELAY = 1;
     private final int SINKING_CLOUD_REPEAT = 3;//Must be odd number to end on Fade out
@@ -92,7 +94,6 @@ public class Ship implements Entity, Cloneable{
     private final int SINKING_SHIP_ANIMATION_DELAY = 5;
     private final int SMOKE_CLOUD_TIME_TO_FADE = 1;
     private final int SMOKE_CLOUD_ANIMATION_DELAY = 0;
-    private final int CANNON_SEPARATION = 16;
 
     /**
      * Builds a ship at a given location and rotation and of a specific model.
@@ -121,8 +122,8 @@ public class Ship implements Entity, Cloneable{
                 SHIP_TYPE = ShipType.GUNBOAT;
                 break;
             case BRIGANTINE:
-                MAX_CANNONS_LEFT = 2;
-                MAX_CANNONS_RIGHT = 2;
+                MAX_CANNONS_LEFT = 4;
+                MAX_CANNONS_RIGHT = 4;
                 MAX_CANNONS_BACK = 1;
                 MAX_CANNONS_FRONT = 1;
                 MAX_CREW = 40;
@@ -167,6 +168,7 @@ public class Ship implements Entity, Cloneable{
         this.y = y;
         rotation = r;
         smoke = new Sprite(new Texture("effects/shots/smoke.png"));
+        healthDisplay = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt"));
         sinkingSmoke = new FadeInFadeOutEffectArea(this, smoke, SINKING_CLOUD_DELAY, (int) this.getSprite().getWidth(), numSinkingClouds, SINKING_CLOUD_REPEAT);
         sinkingFadingAway = new FadeOutEffect(this, SINKING_SHIP_TIME_TO_FADE, SINKING_SHIP_ANIMATION_DELAY);
         cannonSmokes = new Array<FadeOutEffect>();
@@ -176,6 +178,7 @@ public class Ship implements Entity, Cloneable{
         image.setRotation(rotation);
         cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
         cannonShots = new Array<CannonShot>();
+        reloadTime = 0; //TODO change back to 1 e.g. 1 sec per reload
         targets = new Array<Ship>();
         rightAimingLine = new Line();
         leftAimingLine = new Line();
@@ -191,17 +194,16 @@ public class Ship implements Entity, Cloneable{
     public void draw(SpriteBatch batch){
         image.setPosition(x,y);
         image.setRotation(rotation);
+        image.draw(batch);
 
         for (CannonShot cannonShot: cannonShots) {
             cannonShot.draw(batch);
         }
 
-        image.draw(batch);
 
         for (FadeOutEffect effect: cannonSmokes){
-            float r = effect.getSprite().getRotation();
-            effect.getSprite().setRotation(r+=2);
-            effect.getSprite().setPosition(getCenterX(), getCenterY());
+            float r = effect.getSprite().getRotation() + 2;
+            effect.getSprite().setRotation(r);
             effect.animate(batch, Utils.DELTA);
 
             if (effect.done()){
@@ -209,7 +211,7 @@ public class Ship implements Entity, Cloneable{
             }
         }
 
-        new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt")).draw(batch, ""+hull, x, y);
+        healthDisplay.draw(batch, ""+hull, x, y);
 
         if (hull <= 0){
             sinkingFadingAway.animate(batch, Utils.DELTA);
@@ -354,7 +356,7 @@ public class Ship implements Entity, Cloneable{
     private void moveRight(){rotation--;}
 
     public void fireForwardCannons(){
-        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= cannonsForward) {
+        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsForward) {
             for (int i = 0; i < cannonsForward; i++) {
                 CannonShot cannonShot = new CannonShot(getCenterX(), getCenterY(), rotation, loadedShot);
                 cannonSmokes.add(new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY()));
@@ -365,7 +367,7 @@ public class Ship implements Entity, Cloneable{
     }
 
     public void fireBackCannons(){
-        if ((System.currentTimeMillis() - reloadTimerBack)/1000 >= cannonsBack) {
+        if ((System.currentTimeMillis() - reloadTimerBack)/1000 >= reloadTime * cannonsBack) {
             for (int i = 0; i < cannonsBack; i++) {
                 CannonShot cannonShot = new CannonShot(getCenterX(), getCenterY(), rotation + DEGREES_180, loadedShot);
                 cannonSmokes.add(new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY()));
@@ -375,30 +377,41 @@ public class Ship implements Entity, Cloneable{
         }
     }
 
-    public void fireLeftCannons(){
-        if ((System.currentTimeMillis() - reloadTimerLeft)/1000 >= cannonsLeft) {
 
+    public void fireLeftCannons(){
+        if ((System.currentTimeMillis() - reloadTimerLeft)/1000 >= reloadTime * cannonsLeft) {
+            //The angle must be rotated by 180 degrees and the X reversed due to the nature of point rotation
             //Used to flip between placing a shot in front or behind the center of the ship
             boolean flip = true;
-
-            for (int i = 1; i <= cannonsLeft; i++) {
+            int cannonSeparationForward = 16;
+            int cannonSeparationBackward = 0;
+            for (int i = 0; i < cannonsLeft; i++) {
                 CannonShot cannonShot;
                 FadeOutEffect cannonSmoke;
-                float cannonX = getCenterX() - imageWidth / 2;
+                float cannonX = getCenterX() + imageWidth / 2;
+                float cannonY;
+                float smokeX = getCenterX() + imageWidth / 2 + smoke.getWidth();
+                float smokeY;
+                Vector2 cannonPos;
+                Vector2 smokePos;
                 if (flip){
-                    float cannonY = getCenterY() - CANNON_SEPARATION * i;
-                    Vector2 cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), rotation, new Vector2(cannonX, cannonY));
-                    cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation + DEGREES_90, loadedShot);
-                    cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY());
+                    cannonY = getCenterY() + cannonSeparationForward;
+                    smokeY = cannonY;
+                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
+                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
                     flip = false;
+                    cannonSeparationForward += 16;
                 }
                 else {
-                    float cannonY = getCenterY() + CANNON_SEPARATION * i;
-                    Vector2 cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), rotation, new Vector2(cannonX, cannonY));
-                    cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation + DEGREES_90, loadedShot);
-                    cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY());
+                    cannonY = getCenterY() - cannonSeparationBackward;
+                    smokeY = cannonY;
+                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
+                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
                     flip = true;
+                    cannonSeparationBackward += 16;
                 }
+                cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation + DEGREES_90, loadedShot);
+                cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, smokePos.x, smokePos.y);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
             }
@@ -406,10 +419,40 @@ public class Ship implements Entity, Cloneable{
         }
     }
     public void fireRightCannons(){
-        if ((System.currentTimeMillis() - reloadTimerRight)/1000 >= cannonsRight) {
+        if ((System.currentTimeMillis() - reloadTimerRight)/1000 >= reloadTime * cannonsRight) {
+            //The angle must be rotated by 180 degrees and the X reversed due to the nature of point rotation
+            //Used to flip between placing a shot in front or behind the center of the ship
+            boolean flip = true;
+            int cannonSeparationBackward = 16;
+            int cannonSeparationForward = 0;
             for (int i = 0; i < cannonsRight; i++) {
-                CannonShot cannonShot = new CannonShot(getCenterX(), getCenterY(), rotation - DEGREES_90, loadedShot);
-                cannonSmokes.add(new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY()));
+                CannonShot cannonShot;
+                FadeOutEffect cannonSmoke;
+                float cannonX = getCenterX() - imageWidth / 2;
+                float cannonY;
+                float smokeX = getCenterX() - imageWidth / 2;
+                float smokeY;
+                Vector2 cannonPos;
+                Vector2 smokePos;
+                if (flip){
+                    cannonY = getCenterY() + cannonSeparationBackward;
+                    smokeY = cannonY;
+                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
+                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
+                    flip = false;
+                    cannonSeparationBackward += 16;
+                }
+                else {
+                    cannonY = getCenterY() - cannonSeparationForward;
+                    smokeY = cannonY;
+                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
+                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
+                    flip = true;
+                    cannonSeparationForward += 16;
+                }
+                cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation - DEGREES_90, loadedShot);
+                cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, smokePos.x, smokePos.y);
+                cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
             }
             reloadTimerRight = System.currentTimeMillis();
@@ -544,7 +587,6 @@ public class Ship implements Entity, Cloneable{
     public void disposeTextures(){
         image.getTexture().dispose();
         smoke.getTexture().dispose();
-        sinkingSmoke.dispose();
     }
 
 }
