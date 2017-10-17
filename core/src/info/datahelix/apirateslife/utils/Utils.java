@@ -78,7 +78,7 @@ public class Utils {
      * @return a rotated point around (cx, cy) given point p
      */
     public static Vector2 rotatePoint(float cx, float cy, float angle, Vector2 p){
-        //Get the sin and cosine of the angle
+        //Get the sin and cos of the angle
         angle = 360 - angle;
         float s = (float) Math.sin(Math.toRadians(angle));
         float c = (float) Math.cos(Math.toRadians(angle));

@@ -49,5 +49,10 @@ public class TestUtils {
     public void testPointRotation7(){
         Assert.assertEquals(new Vector2(4, 8), Utils.rotatePoint(4, 8, -720, new Vector2(4, 8)));
     }
+
+    @Test
+    public void testPointRotation8(){
+        Assert.assertEquals(new Vector2((float) Math.sqrt(2), 0), Utils.rotatePoint(0, 0, 45, new Vector2(1, 1)));
+    }
 }
 

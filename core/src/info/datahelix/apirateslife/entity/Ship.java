@@ -202,8 +202,9 @@ public class Ship implements Entity, Cloneable{
 
 
         for (FadeOutEffect effect: cannonSmokes){
-            float r = effect.getSprite().getRotation() + 2;
-            effect.getSprite().setRotation(r);
+            //TODO uncomment this so that the smoke rotates again
+//            float r = effect.getSprite().getRotation() + 2;
+//            effect.getSprite().setRotation(r);
             effect.animate(batch, Utils.DELTA);
 
             if (effect.done()){
@@ -211,7 +212,7 @@ public class Ship implements Entity, Cloneable{
             }
         }
 
-        healthDisplay.draw(batch, ""+hull, x, y);
+        healthDisplay.draw(batch, ""+rotation, x, y);
 
         if (hull <= 0){
             sinkingFadingAway.animate(batch, Utils.DELTA);
@@ -383,33 +384,40 @@ public class Ship implements Entity, Cloneable{
             //The angle must be rotated by 180 degrees and the X reversed due to the nature of point rotation
             //Used to flip between placing a shot in front or behind the center of the ship
             boolean flip = true;
-            int cannonSeparationForward = 16;
-            int cannonSeparationBackward = 0;
+            int cannonSeparationBackward = 16;
+            int cannonSeparationForward = 0;
             for (int i = 0; i < cannonsLeft; i++) {
                 CannonShot cannonShot;
                 FadeOutEffect cannonSmoke;
                 float cannonX = getCenterX() + imageWidth / 2;
                 float cannonY;
-                float smokeX = getCenterX() + imageWidth / 2 + smoke.getWidth();
+                float smokeX = getCenterX() + imageWidth / 2;
                 float smokeY;
                 Vector2 cannonPos;
                 Vector2 smokePos;
                 if (flip){
-                    cannonY = getCenterY() + cannonSeparationForward;
-                    smokeY = cannonY;
-                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
-                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
+                    cannonY = getCenterY() + cannonSeparationBackward;
+                    smokeY = getCenterY() + cannonSeparationBackward + smoke.getHeight() / 4;
                     flip = false;
-                    cannonSeparationForward += 16;
-                }
-                else {
-                    cannonY = getCenterY() - cannonSeparationBackward;
-                    smokeY = cannonY;
-                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
-                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
-                    flip = true;
                     cannonSeparationBackward += 16;
                 }
+                //The positions are flipped when sent through the rotation method
+                else {
+                    cannonY = getCenterY() - cannonSeparationForward;
+                    smokeY = getCenterY() - cannonSeparationForward + smoke.getHeight() / 4;
+                    flip = true;
+                    cannonSeparationForward += 16;
+                }
+                cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
+                smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
+
+
+                Vector2 smokeOffsetPos = Utils.rotatePoint(0, 0, DEGREES_180 - rotation, new Vector2(
+                            smoke.getWidth() * (float) Math.cos(Math.toRadians(rotation)),
+                            smoke.getHeight()/4 * (float) Math.sin(Math.toRadians(rotation))
+                ));
+
+                smokePos.add(smokeOffsetPos);
                 cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation + DEGREES_90, loadedShot);
                 cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, smokePos.x, smokePos.y);
                 cannonSmokes.add(cannonSmoke);
