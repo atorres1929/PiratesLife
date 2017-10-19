@@ -32,7 +32,7 @@ import aurelienribon.tweenengine.Tween;
  */
 public class FadeOutEffect extends Effect {
 
-    private Sprite sprite;
+    protected Sprite sprite;
 
     /**
      * Fades an entity out, likely after its death. Ensure that implementing classes properly dispose

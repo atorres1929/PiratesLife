@@ -27,9 +27,6 @@ import com.badlogic.gdx.math.Vector2;
  */
 public interface Entity {
 
-    float x = 0;
-    float y = 0;
-
     /**
      * Draw the Entity
      * @param batch The batch the Entity will be drawn to
