@@ -42,14 +42,14 @@ public class FadeOutEffect extends Effect {
      * @param timeToFade The time it will take for the entity to fade out
      * @param delayToFade The time it will take for the animation to actually start
      */
-    public FadeOutEffect(Entity entity, int timeToFade, int delayToFade){
+    public FadeOutEffect(Entity entity, float timeToFade, float delayToFade){
         this.sprite = entity.getSprite();
         Tween.set(sprite, SpriteAccessor.ALPHA).target(1).start(tweenManager);
         Tween.to(sprite, SpriteAccessor.ALPHA, timeToFade).target(0).delay(delayToFade).start(tweenManager);
     }
 
 
-    public FadeOutEffect(Sprite s, int timeToFade, int delayToFade, float x, float y){
+    public FadeOutEffect(Sprite s, float timeToFade, float delayToFade, float x, float y){
         sprite = new Sprite(s.getTexture());
         sprite.setPosition(x, y);
         Tween.set(sprite, SpriteAccessor.ALPHA).target(1).start(tweenManager);

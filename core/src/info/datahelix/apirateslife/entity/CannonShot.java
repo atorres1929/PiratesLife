@@ -71,7 +71,7 @@ public class CannonShot implements Entity{
     private static final float grapeShotSailDamage = .10f;
     private static final float bombShotHullDamage = 2f;
     private static final float bombShotSailDamage = .75f;
-    private final int speed = 2; //TODO change back to 30
+    private final int speed = 15;
     private float x,y,rotation;
     private float range;
     private float imageRotation;

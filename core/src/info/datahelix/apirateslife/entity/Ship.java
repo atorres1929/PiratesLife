@@ -89,12 +89,12 @@ public class Ship implements Entity, Cloneable{
     private Array<CannonSmoke> cannonSmokes;
     private BitmapFont healthDisplay;
     private int numSinkingClouds;
-    private final int SINKING_CLOUD_DELAY = 1;
+    private final float SINKING_CLOUD_DELAY = 1;
     private final int SINKING_CLOUD_REPEAT = 3;//Must be odd number to end on Fade out
-    private final int SINKING_SHIP_TIME_TO_FADE = 3;
-    private final int SINKING_SHIP_ANIMATION_DELAY = 5;
-    private final int SMOKE_CLOUD_TIME_TO_FADE = 2;
-    private final int SMOKE_CLOUD_ANIMATION_DELAY = 1;
+    private final float SINKING_SHIP_TIME_TO_FADE = 3;
+    private final float SINKING_SHIP_ANIMATION_DELAY = 5;
+    private final float SMOKE_CLOUD_TIME_TO_FADE = .5f;
+    private final float SMOKE_CLOUD_ANIMATION_DELAY = .5f;
 
     /**
      * Builds a ship at a given location and rotation and of a specific model.
@@ -170,7 +170,7 @@ public class Ship implements Entity, Cloneable{
         rotation = r;
         smoke = new Sprite(new Texture("effects/shots/smoke.png"));
         healthDisplay = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt"));
-        sinkingSmoke = new FadeInFadeOutEffectArea(this, smoke, SINKING_CLOUD_DELAY, (int) this.getSprite().getWidth(), numSinkingClouds, SINKING_CLOUD_REPEAT);
+        sinkingSmoke = new FadeInFadeOutEffectArea(this, smoke, SINKING_CLOUD_DELAY, this.getSprite().getWidth(), numSinkingClouds, SINKING_CLOUD_REPEAT);
         sinkingFadingAway = new FadeOutEffect(this, SINKING_SHIP_TIME_TO_FADE, SINKING_SHIP_ANIMATION_DELAY);
         cannonSmokes = new Array<CannonSmoke>();
         image.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -198,14 +198,10 @@ public class Ship implements Entity, Cloneable{
         }
 
 
-        for (FadeOutEffect effect: cannonSmokes){
-            //TODO uncomment this so that the smoke rotates again
-            float r = effect.getSprite().getRotation() + 2;
-            effect.getSprite().setRotation(r);
-            effect.animate(batch, Utils.DELTA);
-
-            if (effect.done()){
-                cannonSmokes.removeValue(effect, false);
+        for (CannonSmoke smoke: cannonSmokes){
+            smoke.animate(batch, Utils.DELTA);
+            if (smoke.done()){
+                cannonSmokes.removeValue(smoke, false);
             }
         }
 
@@ -254,7 +250,7 @@ public class Ship implements Entity, Cloneable{
             cannonShot.move();
         }
         for (CannonSmoke smoke: cannonSmokes){
-
+            smoke.move();
         }
     }
 
@@ -358,113 +354,183 @@ public class Ship implements Entity, Cloneable{
 
     public void fireForwardCannons(){
         if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsForward) {
-            for (int i = 0; i < cannonsForward; i++) {
-                CannonShot cannonShot = new CannonShot(getCenterX(), getCenterY(), rotation, loadedShot);
-                cannonSmokes.add(new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY()));
+
+            CannonShot cannonShot;
+            CannonSmoke cannonSmoke;
+            Vector2 cannonAndSmokePos = new Vector2();
+
+            if (cannonsForward == 1){
+                cannonAndSmokePos.x = getCenterX();
+                cannonAndSmokePos.y = getCenterY();
+                cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation, loadedShot);
+                cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation);
+                cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
+            }
+            else {
+                //Used to flip between placing a shot on the left or right of the ship
+                boolean flip = true;
+                int cannonSeparationLeft = 16;
+                int cannonSeparationRight = 0;
+                for (int i = 0; i < cannonsForward; i++) {
+
+                    if (flip) {
+                        flip = false;
+                        cannonAndSmokePos.x = getCenterX() - cannonSeparationLeft;
+                        cannonAndSmokePos.y = getCenterY();
+                        cannonSeparationLeft += 16;
+                    }
+                    else {
+                        flip = true;
+                        cannonAndSmokePos.x = getCenterX() + cannonSeparationRight;
+                        cannonAndSmokePos.y = getCenterY();
+                        cannonSeparationRight += 16;
+                    }
+                    cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                    cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation, loadedShot);
+                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation);
+                    cannonSmokes.add(cannonSmoke);
+                    cannonShots.add(cannonShot);
+                }
             }
             reloadTimerForward = System.currentTimeMillis();
         }
     }
 
     public void fireBackCannons(){
-        if ((System.currentTimeMillis() - reloadTimerBack)/1000 >= reloadTime * cannonsBack) {
-            for (int i = 0; i < cannonsBack; i++) {
-                CannonShot cannonShot = new CannonShot(getCenterX(), getCenterY(), rotation + DEGREES_180, loadedShot);
-                cannonSmokes.add(new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, getCenterX(), getCenterY()));
+        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsForward) {
+
+            CannonShot cannonShot;
+            CannonSmoke cannonSmoke;
+            Vector2 cannonAndSmokePos = new Vector2();
+
+            if (cannonsForward == 1){
+                cannonAndSmokePos.x = getCenterX();
+                cannonAndSmokePos.y = getCenterY();
+                cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180, loadedShot);
+                cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180);
+                cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
+                reloadTimerForward = System.currentTimeMillis();
             }
-            reloadTimerBack = System.currentTimeMillis();
+            else {
+                //Used to flip between placing a shot on the left or right of the ship
+                boolean flip = true;
+                int cannonSeparationLeft = 16;
+                int cannonSeparationRight = 0;
+                for (int i = 0; i < cannonsForward; i++) {
+
+                    if (flip) {
+                        flip = false;
+                        cannonAndSmokePos.x = getCenterX() - cannonSeparationLeft;
+                        cannonAndSmokePos.y = getCenterY();
+                        cannonSeparationLeft += 16;
+                    }
+                    else {
+                        flip = true;
+                        cannonAndSmokePos.x = getCenterX() + cannonSeparationRight;
+                        cannonAndSmokePos.y = getCenterY();
+                        cannonSeparationRight += 16;
+                    }
+                    cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                    cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180, loadedShot);
+                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90);
+                    cannonSmokes.add(cannonSmoke);
+                    cannonShots.add(cannonShot);
+                }
+            }
         }
     }
 
 
     public void fireLeftCannons(){
         if ((System.currentTimeMillis() - reloadTimerLeft)/1000 >= reloadTime * cannonsLeft) {
-            //The angle must be rotated by 180 degrees and the X reversed due to the nature of point rotation
-            //Used to flip between placing a shot in front or behind the center of the ship
-            boolean flip = true;
-            int cannonSeparationBackward = 16;
-            int cannonSeparationForward = 0;
-            for (int i = 0; i < cannonsLeft; i++) {
-                CannonShot cannonShot;
-                FadeOutEffect cannonSmoke;
-                float cannonX = getCenterX();
-                float cannonY;
-                float smokeX = getCenterX();
-                float smokeY;
-                Vector2 cannonPos;
-                Vector2 smokePos;
-                if (flip){
-                    cannonY = getCenterY() + cannonSeparationBackward;
-                    smokeY = getCenterY() + cannonSeparationBackward + smoke.getHeight() / 4;
-                    flip = false;
-                    cannonSeparationBackward += 16;
-                }
-                //The positions are flipped when sent through the rotation method
-                else {
-                    cannonY = getCenterY() - cannonSeparationForward;
-                    smokeY = getCenterY() - cannonSeparationForward + smoke.getHeight() / 4;
-                    flip = true;
-                    cannonSeparationForward += 16;
-                }
-                cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
-                smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
 
-
-                Vector2 smokeOffsetPos = Utils.rotatePoint(0, 0, DEGREES_180 - rotation,
-                        new Vector2(
-                            smoke.getWidth(),
-                            0
-                        )
-                );
-
-                smokePos.add(smokeOffsetPos);
-                cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation + DEGREES_90, loadedShot);
-                cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, smokePos.x, smokePos.y);
+            CannonShot cannonShot;
+            CannonSmoke cannonSmoke;
+            Vector2 cannonAndSmokePos = new Vector2();
+            if (cannonsLeft == 1){
+                cannonAndSmokePos.x = getCenterX();
+                cannonAndSmokePos.y = getCenterY();
+                cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90, loadedShot);
+                cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
+            }
+            else {
+                //Used to flip between placing a shot on the left or right of the ship
+                boolean flip = true;
+                int cannonSeparationBackward = 16;
+                int cannonSeparationForward = 0;
+                for (int i = 0; i < cannonsLeft; i++) {
+
+                    if (flip) {
+                        flip = false;
+                        cannonAndSmokePos.x = getCenterX();
+                        cannonAndSmokePos.y = getCenterY() - cannonSeparationBackward;
+                        cannonSeparationBackward += 16;
+                    } else {
+                        flip = true;
+                        cannonAndSmokePos.x = getCenterX();
+                        cannonAndSmokePos.y = getCenterY() + cannonSeparationForward;
+                        cannonSeparationForward += 16;
+                    }
+                    cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                    cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90, loadedShot);
+                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90);
+                    cannonSmokes.add(cannonSmoke);
+                    cannonShots.add(cannonShot);
+                }
             }
             reloadTimerLeft = System.currentTimeMillis();
         }
     }
+
+
     public void fireRightCannons(){
         if ((System.currentTimeMillis() - reloadTimerRight)/1000 >= reloadTime * cannonsRight) {
-            //The angle must be rotated by 180 degrees and the X reversed due to the nature of point rotation
-            //Used to flip between placing a shot in front or behind the center of the ship
-            boolean flip = true;
-            int cannonSeparationBackward = 16;
-            int cannonSeparationForward = 0;
-            for (int i = 0; i < cannonsRight; i++) {
-                CannonShot cannonShot;
-                FadeOutEffect cannonSmoke;
-                float cannonX = getCenterX() - imageWidth / 2;
-                float cannonY;
-                float smokeX = getCenterX() - imageWidth / 2;
-                float smokeY;
-                Vector2 cannonPos;
-                Vector2 smokePos;
-                if (flip){
-                    cannonY = getCenterY() + cannonSeparationBackward;
-                    smokeY = cannonY;
-                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
-                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
-                    flip = false;
-                    cannonSeparationBackward += 16;
-                }
-                else {
-                    cannonY = getCenterY() - cannonSeparationForward;
-                    smokeY = cannonY;
-                    cannonPos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(cannonX, cannonY));
-                    smokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, new Vector2(smokeX, smokeY));
-                    flip = true;
-                    cannonSeparationForward += 16;
-                }
-                cannonShot = new CannonShot(cannonPos.x, cannonPos.y, rotation - DEGREES_90, loadedShot);
-                cannonSmoke = new FadeOutEffect(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, smokePos.x, smokePos.y);
+
+            CannonShot cannonShot;
+            CannonSmoke cannonSmoke;
+            Vector2 cannonAndSmokePos = new Vector2();
+            if (cannonsRight == 1){
+                cannonAndSmokePos.x = getCenterX();
+                cannonAndSmokePos.y = getCenterY();
+                cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation - DEGREES_90, loadedShot);
+                cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation - DEGREES_90);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
             }
+            else {
+                //Used to flip between placing a shot on the left or right of the ship
+                boolean flip = true;
+                int cannonSeparationBackward = 16;
+                int cannonSeparationForward = 0;
+                for (int i = 0; i < cannonsRight; i++) {
+
+                    if (flip) {
+                        flip = false;
+                        cannonAndSmokePos.x = getCenterX();
+                        cannonAndSmokePos.y = getCenterY() - cannonSeparationBackward;
+                        cannonSeparationBackward += 16;
+                    } else {
+                        flip = true;
+                        cannonAndSmokePos.x = getCenterX();
+                        cannonAndSmokePos.y = getCenterY() + cannonSeparationForward;
+                        cannonSeparationForward += 16;
+                    }
+                    cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
+                    cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation - DEGREES_90, loadedShot);
+                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation - DEGREES_90);
+                    cannonSmokes.add(cannonSmoke);
+                    cannonShots.add(cannonShot);
+                }
+            }
+
             reloadTimerRight = System.currentTimeMillis();
         }
     }

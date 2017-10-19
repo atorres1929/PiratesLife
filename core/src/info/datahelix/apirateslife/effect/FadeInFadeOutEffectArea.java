@@ -60,8 +60,8 @@ public class FadeInFadeOutEffectArea extends Effect {
      * @see Tween
      * @see TweenManager
      */
-    public FadeInFadeOutEffectArea(Entity entity, Sprite sprite, int fadeDelay, int distanceFromEntity, int numberOfEffects, int numberOfRepeats){
-        DISTANCE_FROM_ENTITY = distanceFromEntity;
+    public FadeInFadeOutEffectArea(Entity entity, Sprite sprite, float fadeDelay, float distanceFromEntity, int numberOfEffects, int numberOfRepeats){
+        DISTANCE_FROM_ENTITY = (int) distanceFromEntity;
         NUMBER_OF_EFFECTS = numberOfEffects;
         this.focusedEntity = entity;
         this.spriteArray = new Sprite[NUMBER_OF_EFFECTS];

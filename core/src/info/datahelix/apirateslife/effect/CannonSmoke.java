@@ -28,26 +28,18 @@ import info.datahelix.apirateslife.entity.Entity;
  * Created by Adam on 10/18/2017.
  */
 
-public class CannonSmoke extends FadeOutEffect implements Entity{
+public class CannonSmoke extends FadeOutEffect {
 
-    private float speed = 3f;
+    private final float speed = 5f;
     private float x, y, rotation, imageRotation;
 
-    public CannonSmoke(Sprite s, int timeToFade, int delayToFade, float x, float y, float rotation) {
+    public CannonSmoke(Sprite s, float timeToFade, float delayToFade, float x, float y, float rotation) {
         super(s, timeToFade, delayToFade, x, y);
         this.rotation = rotation;
         this.x = x;
         this.y = y;
     }
 
-    @Override
-    public void draw(SpriteBatch batch) {
-        sprite.setPosition(x,y);
-        sprite.setRotation(imageRotation);
-        sprite.draw(batch);
-    }
-
-    @Override
     public void move() {
         double scale_X = Math.sin(Math.abs(Math.toRadians(rotation)));
         double scale_Y = Math.cos(Math.abs(Math.toRadians(rotation)));
@@ -67,42 +59,10 @@ public class CannonSmoke extends FadeOutEffect implements Entity{
     }
 
     @Override
-    public Vector2 getPosition() {
-        return new Vector2(x,y);
-    }
-
-    @Override
-    public Vector2 getCenterPosition() {
-        return new Vector2(x + sprite.getWidth() / 2, y + sprite.getHeight() / 2);
-    }
-
-    @Override
-    public float getX() {
-        return x;
-    }
-
-    @Override
-    public float getY() {
-        return y;
-    }
-
-    @Override
-    public float getCenterX() {
-        return x + sprite.getWidth() / 2;
-    }
-
-    @Override
-    public float getCenterY() {
-        return x + sprite.getHeight() / 2;
-    }
-
-    @Override
-    public void disposeTextures() {
-        sprite.getTexture().dispose();
-    }
-
-    @Override
-    public Rectangle getHitBox() {
-        return sprite.getBoundingRectangle();
+    public void animate(SpriteBatch batch, float delta){
+        sprite.setPosition(x,y);
+        sprite.setRotation(imageRotation);
+        super.animate(batch, delta);
     }
 }
+

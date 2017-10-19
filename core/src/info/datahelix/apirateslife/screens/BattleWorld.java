@@ -73,6 +73,8 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
 //        npc_ships.add(new NPC_Ship("HMS Tiny", Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
 //                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()+500,player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
 
+        player.getShip().incrementSailState();
+        player.getShip().incrementSailState();
         player.getShip().setTargets(npc_ships);
 
         for (Ship ship: npc_ships){
@@ -251,6 +253,14 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         else if (keycode == Input.Keys.Q)
             battle.getPlayerShip().fireLeftCannons();
         else if (keycode == Input.Keys.E)
+            battle.getPlayerShip().fireRightCannons();
+        else if (keycode == Input.Keys.UP)
+            battle.getPlayerShip().fireForwardCannons();
+        else if (keycode == Input.Keys.DOWN)
+            battle.getPlayerShip().fireBackCannons();
+        else if (keycode == Input.Keys.LEFT)
+            battle.getPlayerShip().fireLeftCannons();
+        else if (keycode == Input.Keys.RIGHT)
             battle.getPlayerShip().fireRightCannons();
         else if (keycode == Input.Keys.ESCAPE)
             gameState = GameState.PAUSED;
