@@ -19,7 +19,7 @@ package info.datahelix.apirateslife.screens;
 
 import info.datahelix.apirateslife.entity.CannonShot;
 import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ship;
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.utils.Utils;
 import com.badlogic.gdx.Game;

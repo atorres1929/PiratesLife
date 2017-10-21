@@ -12,27 +12,26 @@
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity;
+package info.datahelix.apirateslife.entity.Ships;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import info.datahelix.apirateslife.entity.CannonShot;
+import info.datahelix.apirateslife.entity.Ship;
+import info.datahelix.apirateslife.item.CannonType;
+
 /**
- * Created 5/26/2016
- * @author Adam Torres
+ * Created by Adam Torres on 10/19/2017.
  */
-public class Player extends Person {
 
-    private info.datahelix.apirateslife.entity.Ships.Ship ship;
-    public Player(String name, info.datahelix.apirateslife.entity.Ships.Ship ship){
-        super(name, 100, new Sprite(new Texture("people/player.png")));
-        this.ship = ship;
+public class Gunboat extends Ship {
+
+
+    public Gunboat(String name, ShipType shipType, CannonType cannonType, CannonShot.CannonShotType cannonShotType, float x, float y, float r) {
+        super(name, shipType, cannonType, cannonShotType, x, y, r);
     }
-
-    public info.datahelix.apirateslife.entity.Ships.Ship getShip(){return ship;}
-
-
 }

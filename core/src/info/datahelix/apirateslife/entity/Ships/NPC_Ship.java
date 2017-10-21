@@ -12,17 +12,17 @@
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity;
+package info.datahelix.apirateslife.entity.Ships;
 
+import info.datahelix.apirateslife.entity.CannonShot;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.utils.Utils;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -76,7 +76,7 @@ public class NPC_Ship extends Ship {
         range = Utils.distance(this.x, this.y, target.x, target.y);
 
         if (target == null) {
-            this.sailState = SailState.NONE;
+            this.sailState = 0;
             this.aggro = AI_AGGRESSION_STATE.PASSIVE;
         }
         if (hull == MAX_HULL * .10)

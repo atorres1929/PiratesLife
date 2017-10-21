@@ -17,9 +17,9 @@
 
 package info.datahelix.apirateslife.event;
 
-import info.datahelix.apirateslife.entity.NPC_Ship;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ship;
 import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ship;
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.utils.Utils;
 
 import com.badlogic.gdx.graphics.Camera;

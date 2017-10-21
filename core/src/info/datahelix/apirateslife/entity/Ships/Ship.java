@@ -12,10 +12,10 @@
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity;
+package info.datahelix.apirateslife.entity.Ships;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -31,6 +31,8 @@ import com.badlogic.gdx.utils.Array;
 import info.datahelix.apirateslife.effect.CannonSmoke;
 import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
 import info.datahelix.apirateslife.effect.FadeOutEffect;
+import info.datahelix.apirateslife.entity.CannonShot;
+import info.datahelix.apirateslife.entity.Entity;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.utils.Line;
@@ -40,12 +42,9 @@ import info.datahelix.apirateslife.utils.Utils;
  * Created 5/24/2016
  * @author Adam Torres
  */
-public class Ship implements Entity, Cloneable{
+public abstract class Ship implements Entity, Cloneable{
 
     public enum Direction{LEFT, RIGHT, STRAIGHT}
-    public enum SailState{FULL, HALF, NONE}
-    public enum ShipType{GUNBOAT, BRIGANTINE}
-    public final ShipType SHIP_TYPE;
 
     protected final float DEGREES_360 = 360;
     protected final float DEGREES_270 = 270;
@@ -53,26 +52,23 @@ public class Ship implements Entity, Cloneable{
     protected final float DEGREES_90 = 90;
     protected final float DEGREES_0 = 0;
     protected final int HOW_FAR_FROM_SHIP = 100;
-    protected final Sprite image;
+    protected final Sprite sprite;
     protected final Sprite smoke;
-    protected final float imageWidth;
-    protected final float imageHeight;
 
     protected Array<CannonShot> cannonShots;
     protected Array<Ship> targets;
     protected CannonType cannonType;
     protected CannonShot.CannonShotType loadedShot;
-    protected final int MAX_CANNONS_LEFT, MAX_CANNONS_RIGHT, MAX_CANNONS_FRONT, MAX_CANNONS_BACK;
-    protected final int MAX_CANNONS;
+    protected final int MAX_CANNONS_SIDES, MAX_CANNONS_FRONT, MAX_CANNONS_BACK;
     protected final int MAX_CREW;
     protected final int MAX_HULL;
     protected final int MAX_SAILS;
-    protected final float MAX_SPEED;
-    protected SailState sailState;
+    protected float MAX_SPEED;
+    protected int sailState;
     protected Direction dir;
     protected int cannonsLeft, cannonsRight, cannonsForward, cannonsBack;
     protected long reloadTimerForward, reloadTimerBack, reloadTimerLeft, reloadTimerRight;
-    protected int reloadTime;
+    protected float reloadTime;
     protected Line leftAimingLine, rightAimingLine, forwardAimingLine, backwardAimingLine;
     protected float cannonRange;
     protected String name;
@@ -84,11 +80,11 @@ public class Ship implements Entity, Cloneable{
     protected float rotation;
     protected boolean dead;
 
+    protected int numSinkingClouds;
     private FadeInFadeOutEffectArea sinkingSmoke;
     private FadeOutEffect sinkingFadingAway;
     private Array<CannonSmoke> cannonSmokes;
     private BitmapFont healthDisplay;
-    private int numSinkingClouds;
     private final float SINKING_CLOUD_DELAY = 1;
     private final int SINKING_CLOUD_REPEAT = 3;//Must be odd number to end on Fade out
     private final float SINKING_SHIP_TIME_TO_FADE = 3;
@@ -96,15 +92,42 @@ public class Ship implements Entity, Cloneable{
     private final float SMOKE_CLOUD_TIME_TO_FADE = .5f;
     private final float SMOKE_CLOUD_ANIMATION_DELAY = .5f;
 
-    /**
-     * Builds a ship at a given location and rotation and of a specific model.
-     * @param shipType The type of ship to be drawn
-     * @param x The x coordinate where the ship should be placed
-     * @param y The y coordinate where the ship should be placed
-     * @param r The rotation the ship should be set at when placed.
-     */
-    public Ship(String name, ShipType shipType, CannonType cannonType, CannonShot.CannonShotType cannonShotType, float x, float y, float r){
+    public Ship(String name, Sprite sprite, float x, float y, float rotation, int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
+                int maxCrew, int maxHull, int maxSails){
 
+        this.name = name;
+        this.sprite = sprite;
+        this.x = x;
+        this.y = y;
+        this.rotation = rotation;
+        cannonsLeft = cannonsRight = MAX_CANNONS_SIDES = maxCannonsSides;
+        cannonsForward = MAX_CANNONS_FRONT = maxCannonsFront;
+        cannonsBack = MAX_CANNONS_BACK = maxCannonsBack;
+        MAX_CREW = maxCrew;
+        MAX_HULL = maxHull;
+        MAX_SAILS = maxSails;
+        dead = false;
+        sailState = 0;
+        this.cannonType = cannonType;
+        this.loadedShot = CannonShot.CannonShotType.ROUNDSHOT;
+        dir = Direction.STRAIGHT;
+        smoke = new Sprite(new Texture("effects/shots/smoke.png"));
+        healthDisplay = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt"));
+        sinkingSmoke = new FadeInFadeOutEffectArea(this, smoke, SINKING_CLOUD_DELAY, this.getSprite().getWidth(), numSinkingClouds, SINKING_CLOUD_REPEAT);
+        sinkingFadingAway = new FadeOutEffect(this, SINKING_SHIP_TIME_TO_FADE, SINKING_SHIP_ANIMATION_DELAY);
+        cannonSmokes = new Array<CannonSmoke>();
+        this.sprite.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        this.sprite.setOriginCenter();
+        this.sprite.setPosition(x,y);
+        this.sprite.setRotation(rotation);
+        cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
+        cannonShots = new Array<CannonShot>();
+        reloadTime = 0.5f;
+        targets = new Array<Ship>();
+        rightAimingLine = new Line();
+        leftAimingLine = new Line();
+        forwardAimingLine = new Line();
+        backwardAimingLine = new Line();
         switch(shipType){
             case GUNBOAT:
                 MAX_CANNONS_LEFT = 1;
@@ -118,7 +141,7 @@ public class Ship implements Entity, Cloneable{
                 crew = MAX_CREW;
                 hull = MAX_HULL;
                 sails = MAX_SAILS;
-                image = new Sprite(new Texture("ships/gunboat.png"));
+                sprite = new Sprite(new Texture("ships/gunboat.png"));
                 numSinkingClouds = 5;
                 SHIP_TYPE = ShipType.GUNBOAT;
                 break;
@@ -134,57 +157,12 @@ public class Ship implements Entity, Cloneable{
                 crew = MAX_CREW;
                 hull = MAX_HULL;
                 sails = MAX_SAILS;
-                image = new Sprite(new Texture("ships/brigantine.png"));
+                sprite = new Sprite(new Texture("ships/brigantine.png"));
                 numSinkingClouds = 30;
                 SHIP_TYPE = ShipType.BRIGANTINE;
                 break;
-            default:
-                MAX_CANNONS_LEFT = 0;
-                MAX_CANNONS_RIGHT = 0;
-                MAX_CANNONS_BACK = 0;
-                MAX_CANNONS_FRONT = 0;
-                MAX_CREW = 0;
-                MAX_HULL = 0;
-                MAX_SAILS = 0;
-                MAX_SPEED = 0;
-                image = null;
-                SHIP_TYPE = null;
-                break;
         }
-        dead = false;
-        sailState = SailState.NONE;
-        MAX_CANNONS = MAX_CANNONS_BACK+MAX_CANNONS_FRONT+MAX_CANNONS_RIGHT+MAX_CANNONS_LEFT;
-        cannonsLeft = MAX_CANNONS_LEFT;
-        cannonsRight = MAX_CANNONS_RIGHT;
-        cannonsBack = MAX_CANNONS_BACK;
-        cannonsForward = MAX_CANNONS_FRONT;
-        this.cannonType = cannonType;
-        this.loadedShot = cannonShotType;
-        dir = Direction.STRAIGHT;
-        imageWidth = image.getWidth();
-        imageHeight = image.getHeight();
 
-        this.name = name;
-        this.x = x;
-        this.y = y;
-        rotation = r;
-        smoke = new Sprite(new Texture("effects/shots/smoke.png"));
-        healthDisplay = new BitmapFont(Gdx.files.internal("fonts/corsiva_title_black.fnt"));
-        sinkingSmoke = new FadeInFadeOutEffectArea(this, smoke, SINKING_CLOUD_DELAY, this.getSprite().getWidth(), numSinkingClouds, SINKING_CLOUD_REPEAT);
-        sinkingFadingAway = new FadeOutEffect(this, SINKING_SHIP_TIME_TO_FADE, SINKING_SHIP_ANIMATION_DELAY);
-        cannonSmokes = new Array<CannonSmoke>();
-        image.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        image.setOriginCenter();
-        image.setPosition(x,y);
-        image.setRotation(rotation);
-        cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
-        cannonShots = new Array<CannonShot>();
-        reloadTime = 0; //TODO change back to 1 e.g. 1 sec per reload
-        targets = new Array<Ship>();
-        rightAimingLine = new Line();
-        leftAimingLine = new Line();
-        forwardAimingLine = new Line();
-        backwardAimingLine = new Line();
     }
 
     /**
@@ -217,9 +195,9 @@ public class Ship implements Entity, Cloneable{
         }
 
         //draw ship last
-        image.setPosition(x,y);
-        image.setRotation(rotation);
-        image.draw(batch);
+        sprite.setPosition(x,y);
+        sprite.setRotation(rotation);
+        sprite.draw(batch);
     }
 
     public void drawDebugLines(ShapeRenderer shapeRenderer){
@@ -279,25 +257,11 @@ public class Ship implements Entity, Cloneable{
                     moveRight();
                     break;
             }
-            switch (sailState) {
-                case FULL:
-                    if (speed < MAX_SPEED){
-                        speed+=0.01f;
-                    }
-                    break;
-                case HALF:
-                    if (speed > MAX_SPEED / 2) {
-                        speed-=0.01f;
-                    }
-                    else if (speed < MAX_SPEED / 2){
-                        speed+=0.01f;
-                    }
-                    break;
-                case NONE:
-                    if (speed > 0){
-                        speed-=0.01f;
-                    }
-                    break;
+            if (speed < sailState){
+                speed += 0.01f;
+            }
+            else{
+                speed -= 0.01f;
             }
             ensureWithinBorders();
 
@@ -324,19 +288,19 @@ public class Ship implements Entity, Cloneable{
      * Ensures the ship is still in the borders of the map, and if not, places is back in the borders with it's rotation reversed.
      */
     private void ensureWithinBorders(){
-        if (x > BattleWorld.WORLD_SIZE-imageWidth) {
+        if (x > BattleWorld.WORLD_SIZE-sprite.getWidth()) {
             rotation += DEGREES_180;
             x -= 10;
         }
-        else if  (x < 0+imageWidth) {
+        else if  (x < 0+sprite.getWidth()) {
             rotation += DEGREES_180;
             x += 10;
         }
-        else if (y > BattleWorld.WORLD_SIZE-imageHeight){
+        else if (y > BattleWorld.WORLD_SIZE-sprite.getHeight()){
             rotation += DEGREES_180;
             y -= 10;
         }
-        else if (y < 0+imageHeight){
+        else if (y < 0+sprite.getHeight()){
             rotation += DEGREES_180;
             y += 10;
         }
@@ -399,13 +363,13 @@ public class Ship implements Entity, Cloneable{
     }
 
     public void fireBackCannons(){
-        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsForward) {
+        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsBack) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
             Vector2 cannonAndSmokePos = new Vector2();
 
-            if (cannonsForward == 1){
+            if (cannonsBack == 1){
                 cannonAndSmokePos.x = getCenterX();
                 cannonAndSmokePos.y = getCenterY();
                 cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
@@ -413,14 +377,13 @@ public class Ship implements Entity, Cloneable{
                 cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
-                reloadTimerForward = System.currentTimeMillis();
             }
             else {
                 //Used to flip between placing a shot on the left or right of the ship
                 boolean flip = true;
                 int cannonSeparationLeft = 16;
                 int cannonSeparationRight = 0;
-                for (int i = 0; i < cannonsForward; i++) {
+                for (int i = 0; i < cannonsBack; i++) {
 
                     if (flip) {
                         flip = false;
@@ -436,11 +399,12 @@ public class Ship implements Entity, Cloneable{
                     }
                     cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
                     cannonShot = new CannonShot(cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180, loadedShot);
-                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90);
+                    cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180);
                     cannonSmokes.add(cannonSmoke);
                     cannonShots.add(cannonShot);
                 }
             }
+            reloadTimerBack = System.currentTimeMillis();
         }
     }
 
@@ -539,20 +503,18 @@ public class Ship implements Entity, Cloneable{
      * Increments the sail state.
      */
     public void incrementSailState(){
-        if (SailState.NONE == sailState)
-            sailState = SailState.HALF;
-        else if (SailState.HALF == sailState)
-            sailState = SailState.FULL;
+        if (sailState < MAX_SPEED){
+            sailState++;
+        }
     }
 
     /**
      * Decrements the sail state.
      */
     public void decrementSailState(){
-        if (SailState.FULL == sailState)
-            sailState = SailState.HALF;
-        else if (SailState.HALF == sailState)
-            sailState = SailState.NONE;
+        if (sailState > 0){
+            sailState--;
+        }
     }
 
     protected void calculateAimingLines(){
@@ -603,12 +565,12 @@ public class Ship implements Entity, Cloneable{
     public Array<CannonShot> getCannonShots(){return cannonShots;}
 
     @Override
-    public Rectangle getHitBox(){return image.getBoundingRectangle();}
+    public Rectangle getHitBox(){return sprite.getBoundingRectangle();}
 
     public float getRotation(){return rotation; }
 
     @Override
-    public Sprite getSprite(){return image;}
+    public Sprite getSprite(){return sprite;}
     /**
      * Gets the position of the ship based on the image of the ship (the lower left corner)
      * @return The position of the ship based on the image of the ship.
@@ -621,7 +583,7 @@ public class Ship implements Entity, Cloneable{
      * @return Ship's center
      */
     @Override
-    public Vector2 getCenterPosition(){return new Vector2(x+imageWidth/2,y+imageHeight/2);}
+    public Vector2 getCenterPosition(){return new Vector2(x+sprite.getWidth()/2,y+sprite.getHeight()/2);}
     /**
      * Gives a point in front of the ship from a predetermined distance {@code HOW_FAR_FROM_SHIP}
      * 90 Degrees is added to the original computation to make 0 degrees North of the Ship
@@ -639,14 +601,14 @@ public class Ship implements Entity, Cloneable{
      * @return the Ship's x that is in the center of the ship.
      */
     @Override
-    public float getCenterX(){return x+imageWidth/2;}
+    public float getCenterX(){return x+sprite.getWidth()/2;}
 
     /**
      * Gives the ship's y based on where the center of the ship's image is located.
      * @return the Ship's y that is in the center of the ship.
      */
     @Override
-    public float getCenterY(){return y+imageHeight/2;}
+    public float getCenterY(){return y+sprite.getHeight()/2;}
 
     public float getCannonRange(){return cannonRange;}
 
@@ -661,7 +623,7 @@ public class Ship implements Entity, Cloneable{
      */
     @Override
     public void disposeTextures(){
-        image.getTexture().dispose();
+        sprite.getTexture().dispose();
         smoke.getTexture().dispose();
     }
 
