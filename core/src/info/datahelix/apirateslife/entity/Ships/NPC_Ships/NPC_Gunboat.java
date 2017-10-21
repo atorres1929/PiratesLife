@@ -15,26 +15,28 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity.Ships;
+package info.datahelix.apirateslife.entity.Ships.NPC_Ships;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 
 /**
- * Created 10/20/2017
- *
- * @author Adam Torres
+ * Created by Adam Torres on 10/19/2017.
  */
 
-public class Gunboat extends Ship {
-    public Gunboat(String name, float x, float y, float rotation) {
+public class NPC_Gunboat extends NPC_Ship {
+
+    public NPC_Gunboat(String name, float x, float y, float rotation, Ship target, AI_AGGRESSION_STATE aggro) {
         super(name, new Sprite(new Texture("ships/gunboat.png")),
                 x, y, rotation,
                 1, 0, 0,
                 new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.SHORT_CANNON),
                 10, 100, 70, 5,
-                10);
+                10,
+                target, aggro);
     }
 }

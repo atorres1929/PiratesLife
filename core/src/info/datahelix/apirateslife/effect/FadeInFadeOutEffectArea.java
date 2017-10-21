@@ -65,6 +65,7 @@ public class FadeInFadeOutEffectArea extends Effect {
         NUMBER_OF_EFFECTS = numberOfEffects;
         this.focusedEntity = entity;
         this.spriteArray = new Sprite[NUMBER_OF_EFFECTS];
+        this.sprite = sprite;
         this.random = new Random();
         float delay = 0;
         for (int i = 0; i < spriteArray.length; i++){

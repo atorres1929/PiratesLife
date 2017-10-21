@@ -19,6 +19,9 @@ package info.datahelix.apirateslife.screens;
 
 import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
 import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Brigantine;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Gunboat;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
 import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.event.Battle;
 import info.datahelix.apirateslife.utils.Utils;
@@ -68,13 +71,10 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private Viewport viewport;
     public BattleWorld(Player player){
         Array<Ship> npc_ships = new Array<Ship>();
-//        npc_ships.add(new NPC_Ship("HMS Victory", Ship.ShipType.BRIGANTINE, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-//                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()-500,player.getShip().getY(), 0, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
-//        npc_ships.add(new NPC_Ship("HMS Tiny", Ship.ShipType.GUNBOAT, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-//                CannonShot.CannonShotType.ROUNDSHOT, player.getShip().getX()+500,player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+        npc_ships.add(new NPC_Brigantine("Boat 1", player.getShip().getX()-500, player.getShip().getY(), 0, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.PASSIVE));
+        npc_ships.add(new NPC_Gunboat("Boat 2", player.getShip().getX()+500, player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.RUNNING));
 
-        player.getShip().incrementSailState();
-        player.getShip().incrementSailState();
+        player.getShip().setSpeedMax();
         player.getShip().setTargets(npc_ships);
 
         for (Ship ship: npc_ships){
@@ -247,9 +247,9 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
         else if (keycode == Input.Keys.D)
             battle.getPlayerShip().setDirection(Ship.Direction.RIGHT);
         else if (keycode == Input.Keys.W)
-            battle.getPlayerShip().incrementSailState();
+            battle.getPlayerShip().speedUp();
         else if (keycode == Input.Keys.S)
-            battle.getPlayerShip().decrementSailState();
+            battle.getPlayerShip().speedDown();
         else if (keycode == Input.Keys.Q)
             battle.getPlayerShip().fireLeftCannons();
         else if (keycode == Input.Keys.E)

@@ -12,16 +12,18 @@
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity.Ships;
+package info.datahelix.apirateslife.entity.Ships.NPC_Ships;
 
-import info.datahelix.apirateslife.entity.CannonShot;
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.utils.Utils;
 
+import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -29,7 +31,7 @@ import com.badlogic.gdx.math.Vector2;
  * Created 5/19/2016
  * @author Adam Torres
  */
-public class NPC_Ship extends Ship {
+public abstract class NPC_Ship extends Ship {
 
     public enum AI_AGGRESSION_STATE {
         PASSIVE, CHASE, BROADSIDE, RUNNING;
@@ -62,18 +64,22 @@ public class NPC_Ship extends Ship {
     private AI_AGGRESSION_STATE aggro;
     private Color aggro_Color;
 
-    public NPC_Ship(String name, ShipType shipType, CannonType cannonType, CannonShot.CannonShotType cannonShotType, float x, float y, float rotation, Ship target, AI_AGGRESSION_STATE aggro) {
-        super(name, shipType, cannonType, cannonShotType, x, y, rotation);
+    public NPC_Ship(String name, Sprite sprite, float x, float y, float rotation, int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
+                int maxCrew, int maxHull, int maxSails, int maxSpeed,
+                int numSinkingClouds,
+                Ship target, AI_AGGRESSION_STATE aggro){
+        super(name, sprite, x, y, rotation, maxCannonsSides, maxCannonsFront, maxCannonsBack, cannonType, maxCrew, maxHull, maxSails, maxSpeed, numSinkingClouds);
         this.target = target;
         this.aggro = aggro;
         aggro_Color = aggro.getColor();
-        range = Utils.distance(this.x, this.y, target.x, target.y);
+        range = Utils.distance(this.getCenterX(), this.getCenterY(), target.getCenterX(), target.getCenterY());
+        setSpeedMax();
     }
 
     @Override
     public void move() {
         super.move();
-        range = Utils.distance(this.x, this.y, target.x, target.y);
+        range = Utils.distance(this.getCenterX(), this.getCenterY(), target.getCenterX(), target.getCenterY());
 
         if (target == null) {
             this.sailState = 0;
@@ -87,16 +93,19 @@ public class NPC_Ship extends Ship {
             case BROADSIDE:
             case CHASE:
                 attackAI();
+                checkFireCannons();
                 break;
 
             case RUNNING:
                 runningAI();
+                checkFireCannons();
                 break;
 
             case PASSIVE:
                 passiveAI();
                 break;
         }
+        aggro_Color = aggro.getColor();
     }
 
     /**
@@ -141,13 +150,27 @@ public class NPC_Ship extends Ship {
 
     }
 
-    private void broadSideAI() {
-        aggro_Color = aggro.getColor();
-        if (angleToTarget < DEGREES_90) {
-            dir = Direction.RIGHT;
-        } else if (angleToTarget >= DEGREES_90) {
-            dir = Direction.LEFT;
+    private float calculateNextMoveDirection(Direction direction){
+        try {
+            NPC_Ship ship = (NPC_Ship) this.clone();
+            ship.setDirection(direction);
+            ship.moveProjection();
+            Vector2 A = target.getPosition();
+            Vector2 B = ship.getPosition();
+            Vector2 C = ship.getPositionFrontOfShip();
+            float a = Utils.distance(C, B);
+            float b = Utils.distance(C, A);
+            float c = Utils.distance(A, B);
+
+            float projectedAngleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
+            return projectedAngleToTarget;
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return -1f;
         }
+    }
+
+    private void checkFireCannons(){
         if (Utils.lineIntersectsRectangle(leftAimingLine, target.getHitBox())){
             fireLeftCannons();
         }
@@ -157,19 +180,27 @@ public class NPC_Ship extends Ship {
         else if (Utils.lineIntersectsRectangle(backwardAimingLine, target.getHitBox())){
             fireBackCannons();
         }
-
+        else if (Utils.lineIntersectsRectangle(forwardAimingLine, target.getHitBox())){
+            fireForwardCannons();
+        }
     }
 
+    private void broadSideAI() {
+        if (angleToTarget < DEGREES_90) {
+            dir = Direction.RIGHT;
+        } else if (angleToTarget >= DEGREES_90) {
+            dir = Direction.LEFT;
+        }
+    }
+
+
     private void chaseAI() {
-        aggro_Color = aggro.getColor();
         if (angleToTarget < 1){
             dir = Direction.STRAIGHT;
             return;
 
         }
-        if (Utils.lineIntersectsRectangle(forwardAimingLine, target.getHitBox())){
-            fireForwardCannons();
-        }
+
         if (projectedAngleToTarget > angleToTarget){
             if (dir == Direction.LEFT){
                 dir = Direction.RIGHT;
@@ -200,15 +231,22 @@ public class NPC_Ship extends Ship {
     }
 
     private void runningAI() {
-        aggro_Color = aggro.getColor();
-        if (angleToTarget < DEGREES_180-10)
-            dir = Direction.RIGHT;
-        else
+        calculateAngleToTarget();
+        if (angleToTarget > 179){
+            dir = Direction.STRAIGHT;
+            return;
+
+        }
+
+        if (calculateNextMoveDirection(Direction.RIGHT) < calculateNextMoveDirection(Direction.LEFT)){
             dir = Direction.LEFT;
+        }
+        else{
+            dir = Direction.RIGHT;
+        }
     }
 
     private void passiveAI() {
-        aggro_Color = aggro.getColor();
 
         dir = Direction.STRAIGHT;
     }

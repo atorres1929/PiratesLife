@@ -19,6 +19,8 @@ package info.datahelix.apirateslife.screens;
 
 import info.datahelix.apirateslife.entity.CannonShot;
 import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.Brigantine;
+import info.datahelix.apirateslife.entity.Ships.Gunboat;
 import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.utils.Utils;
@@ -78,8 +80,7 @@ public class MainMenu implements Screen{
             public void clicked(InputEvent event, float x, float y){
                 ((Game) Gdx.app.getApplicationListener()).getScreen().dispose();
                 ((Game) Gdx.app.getApplicationListener()).setScreen(new BattleWorld(new Player("Player",
-                        new Ship("Player Ship",Ship.ShipType.BRIGANTINE, new CannonType(CannonType.CannonWeightType.THIRTYTWO_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-                                CannonShot.CannonShotType.ROUNDSHOT, BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
+                        new Gunboat("Player Ship", BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
             }
         });
         table.add(newGame);

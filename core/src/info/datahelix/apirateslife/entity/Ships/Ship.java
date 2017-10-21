@@ -63,7 +63,7 @@ public abstract class Ship implements Entity, Cloneable{
     protected final int MAX_CREW;
     protected final int MAX_HULL;
     protected final int MAX_SAILS;
-    protected float MAX_SPEED;
+    protected final int MAX_SPEED;
     protected int sailState;
     protected Direction dir;
     protected int cannonsLeft, cannonsRight, cannonsForward, cannonsBack;
@@ -76,11 +76,9 @@ public abstract class Ship implements Entity, Cloneable{
     protected float hull;
     protected float sails;
     protected float speed;
-    protected float x, y;
-    protected float rotation;
     protected boolean dead;
+    protected float x, y, rotation;
 
-    protected int numSinkingClouds;
     private FadeInFadeOutEffectArea sinkingSmoke;
     private FadeOutEffect sinkingFadingAway;
     private Array<CannonSmoke> cannonSmokes;
@@ -93,7 +91,8 @@ public abstract class Ship implements Entity, Cloneable{
     private final float SMOKE_CLOUD_ANIMATION_DELAY = .5f;
 
     public Ship(String name, Sprite sprite, float x, float y, float rotation, int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
-                int maxCrew, int maxHull, int maxSails){
+                int maxCrew, int maxHull, int maxSails, int maxSpeed,
+                int numSinkingClouds){
 
         this.name = name;
         this.sprite = sprite;
@@ -103,9 +102,10 @@ public abstract class Ship implements Entity, Cloneable{
         cannonsLeft = cannonsRight = MAX_CANNONS_SIDES = maxCannonsSides;
         cannonsForward = MAX_CANNONS_FRONT = maxCannonsFront;
         cannonsBack = MAX_CANNONS_BACK = maxCannonsBack;
-        MAX_CREW = maxCrew;
-        MAX_HULL = maxHull;
-        MAX_SAILS = maxSails;
+        crew = MAX_CREW = maxCrew;
+        hull = MAX_HULL = maxHull;
+        sails = MAX_SAILS = maxSails;
+        speed = MAX_SPEED = maxSpeed;
         dead = false;
         sailState = 0;
         this.cannonType = cannonType;
@@ -128,41 +128,6 @@ public abstract class Ship implements Entity, Cloneable{
         leftAimingLine = new Line();
         forwardAimingLine = new Line();
         backwardAimingLine = new Line();
-        switch(shipType){
-            case GUNBOAT:
-                MAX_CANNONS_LEFT = 1;
-                MAX_CANNONS_RIGHT = 1;
-                MAX_CANNONS_BACK = 0;
-                MAX_CANNONS_FRONT = 0;
-                MAX_CREW =10;
-                MAX_HULL = 100;
-                MAX_SAILS = 70;
-                MAX_SPEED = 5;
-                crew = MAX_CREW;
-                hull = MAX_HULL;
-                sails = MAX_SAILS;
-                sprite = new Sprite(new Texture("ships/gunboat.png"));
-                numSinkingClouds = 5;
-                SHIP_TYPE = ShipType.GUNBOAT;
-                break;
-            case BRIGANTINE:
-                MAX_CANNONS_LEFT = 4;
-                MAX_CANNONS_RIGHT = 4;
-                MAX_CANNONS_BACK = 1;
-                MAX_CANNONS_FRONT = 1;
-                MAX_CREW = 40;
-                MAX_HULL = 300;
-                MAX_SAILS = 200;
-                MAX_SPEED = 2;
-                crew = MAX_CREW;
-                hull = MAX_HULL;
-                sails = MAX_SAILS;
-                sprite = new Sprite(new Texture("ships/brigantine.png"));
-                numSinkingClouds = 30;
-                SHIP_TYPE = ShipType.BRIGANTINE;
-                break;
-        }
-
     }
 
     /**
@@ -183,7 +148,12 @@ public abstract class Ship implements Entity, Cloneable{
             }
         }
 
-        healthDisplay.draw(batch, ""+rotation, x, y);
+        healthDisplay.draw(batch, ""+hull, x, y);
+
+        //draw ship last
+        sprite.setPosition(x,y);
+        sprite.setRotation(rotation);
+        sprite.draw(batch);
 
         if (hull <= 0){
             sinkingFadingAway.animate(batch, Utils.DELTA);
@@ -193,11 +163,6 @@ public abstract class Ship implements Entity, Cloneable{
                 this.dead = true;
             }
         }
-
-        //draw ship last
-        sprite.setPosition(x,y);
-        sprite.setRotation(rotation);
-        sprite.draw(batch);
     }
 
     public void drawDebugLines(ShapeRenderer shapeRenderer){
@@ -363,7 +328,7 @@ public abstract class Ship implements Entity, Cloneable{
     }
 
     public void fireBackCannons(){
-        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsBack) {
+        if ((System.currentTimeMillis() - reloadTimerBack)/1000 >= reloadTime * cannonsBack) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
@@ -500,9 +465,25 @@ public abstract class Ship implements Entity, Cloneable{
     }
 
     /**
+     * Set speed to highest possible value
+     * Essentially using all sails on the ship
+     */
+    public void setSpeedMax(){
+        sailState = MAX_SPEED;
+    }
+
+    /**
+     * Set speed to lowest possible value
+     * Essentially putting away all sails on the ship
+     */
+    public void setSpeedMin(){
+        sailState = 0;
+    }
+
+    /**
      * Increments the sail state.
      */
-    public void incrementSailState(){
+    public void speedUp(){
         if (sailState < MAX_SPEED){
             sailState++;
         }
@@ -511,7 +492,7 @@ public abstract class Ship implements Entity, Cloneable{
     /**
      * Decrements the sail state.
      */
-    public void decrementSailState(){
+    public void speedDown(){
         if (sailState > 0){
             sailState--;
         }

@@ -64,4 +64,8 @@ public abstract class Effect {
 
     public boolean done(){return tweenManager.getRunningTweensCount() == 0;}
 
+    public Sprite getSprite(){
+        return sprite;
+    }
+
 }
