@@ -19,10 +19,6 @@ package info.datahelix.apirateslife.effect;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-
-import info.datahelix.apirateslife.entity.Entity;
 
 /**
  * Created by Adam on 10/18/2017.

@@ -17,19 +17,21 @@
 
 package info.datahelix.apirateslife.entity;
 
-import info.datahelix.apirateslife.utils.Utils;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
 import info.datahelix.apirateslife.item.CannonType;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/29/2016
  * @author Adam Torres
  */
-public class CannonShot implements Entity{
+public class CannonShot implements CollideableEntity{
 
     public enum CannonShotType{
 
@@ -136,6 +138,21 @@ public class CannonShot implements Entity{
 
         imageRotation+=5;
         range += Utils.distance(0, 0, distance_X, distance_Y);
+    }
+
+    @Override
+    public void checkCollision(Rectangle rectangle) {
+
+    }
+
+    @Override
+    public void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target) {
+
+    }
+
+    @Override
+    public void setCollideables(Array<CollideableEntity> collideables) {
+
     }
 
     public Rectangle getHitBox(){return image.getBoundingRectangle();}

@@ -17,10 +17,6 @@
 
 package info.datahelix.apirateslife.effect;
 
-import info.datahelix.apirateslife.entity.Entity;
-import info.datahelix.apirateslife.utils.SpriteAccessor;
-import info.datahelix.apirateslife.utils.Utils;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -29,6 +25,9 @@ import java.util.Random;
 
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
+import info.datahelix.apirateslife.entity.Entity;
+import info.datahelix.apirateslife.utils.SpriteAccessor;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * This class is for creating an area effect of many sprites fading in and fading out around an entity.

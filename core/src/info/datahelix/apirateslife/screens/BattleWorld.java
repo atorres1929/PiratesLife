@@ -17,14 +17,6 @@
 
 package info.datahelix.apirateslife.screens;
 
-import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
-import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Brigantine;
-import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Gunboat;
-import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
-import info.datahelix.apirateslife.entity.Ships.Ship;
-import info.datahelix.apirateslife.event.Battle;
-import info.datahelix.apirateslife.utils.Utils;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -45,6 +37,15 @@ import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import aurelienribon.tweenengine.Tween;
+import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
+import info.datahelix.apirateslife.entity.CollideableEntity;
+import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Brigantine;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Gunboat;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
+import info.datahelix.apirateslife.entity.Ships.Ship;
+import info.datahelix.apirateslife.event.Battle;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/26/2016
@@ -59,7 +60,6 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private final int EFFECT_MAX_DISTANCE_FROM_SHIP = 2000;
     private final int WAVE_NUMBER = 100;
     private final int WAVE_FADE_DELAY = 1;
-    private final int CLOUD_NUMBER = 30;
     private GameState gameState;
     private Battle battle;
     private Sprite runningBackground;
@@ -70,19 +70,23 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private OrthographicCamera camera;
     private Viewport viewport;
     public BattleWorld(Player player){
-        Array<Ship> npc_ships = new Array<Ship>();
-        npc_ships.add(new NPC_Brigantine("Boat 1", player.getShip().getX()-500, player.getShip().getY(), 0, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.PASSIVE));
-        npc_ships.add(new NPC_Gunboat("Boat 2", player.getShip().getX()+500, player.getShip().getY(), 180, player.getShip(), NPC_Ship.AI_AGGRESSION_STATE.RUNNING));
+        Array<CollideableEntity> collideables = new Array<CollideableEntity>();
+        collideables.add(player.getShip());
+        collideables.add(new NPC_Brigantine("Boat 1", player.getShip().getX()-500, player.getShip().getY(), 0, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+        collideables.add(new NPC_Gunboat("Boat 2", player.getShip().getX()+500, player.getShip().getY(), 180, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+        for (CollideableEntity collideable: collideables){
+            collideable.setCollideables(collideables);
+            if (collideable instanceof Ship){
+                if (collideable instanceof NPC_Ship){
+                    ((NPC_Ship) collideable).addEnemy(player.getShip());
+                }
+            }
+        }
 
         player.getShip().setSpeedMax();
-        player.getShip().setTargets(npc_ships);
-
-        for (Ship ship: npc_ships){
-            ship.setTarget(player.getShip());
-        }
         camera = new OrthographicCamera();
         batch = new SpriteBatch();
-        battle = new Battle(player, npc_ships, camera, batch);
+        battle = new Battle(player, collideables, camera, batch);
         shapeRenderer = new ShapeRenderer();
         runningBackground = new Sprite(new Texture("backgrounds/sea.png"));
         wave = new Sprite(new Texture("effects/ocean/wave.png"));

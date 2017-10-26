@@ -17,15 +17,15 @@
 
 package info.datahelix.apirateslife.entity.Ships.NPC_Ships;
 
-import info.datahelix.apirateslife.entity.Ships.Ship;
-import info.datahelix.apirateslife.item.CannonType;
-import info.datahelix.apirateslife.utils.Utils;
-
-import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import info.datahelix.apirateslife.entity.Ships.Ship;
+import info.datahelix.apirateslife.item.CannonType;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/19/2016
@@ -57,6 +57,7 @@ public abstract class NPC_Ship extends Ship {
         }
     }
 
+    protected Array<Ship> enemies;
     protected Ship target;
     protected float range;
     private float angleToTarget;
@@ -64,26 +65,32 @@ public abstract class NPC_Ship extends Ship {
     private AI_AGGRESSION_STATE aggro;
     private Color aggro_Color;
 
-    public NPC_Ship(String name, Sprite sprite, float x, float y, float rotation, int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
+    public NPC_Ship(String name, Sprite sprite, float x, float y, float rotation,
+                int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
                 int maxCrew, int maxHull, int maxSails, int maxSpeed,
                 int numSinkingClouds,
-                Ship target, AI_AGGRESSION_STATE aggro){
+                AI_AGGRESSION_STATE aggro){
         super(name, sprite, x, y, rotation, maxCannonsSides, maxCannonsFront, maxCannonsBack, cannonType, maxCrew, maxHull, maxSails, maxSpeed, numSinkingClouds);
-        this.target = target;
         this.aggro = aggro;
         aggro_Color = aggro.getColor();
-        range = Utils.distance(this.getCenterX(), this.getCenterY(), target.getCenterX(), target.getCenterY());
+        enemies = new Array<Ship>();
         setSpeedMax();
     }
+
 
     @Override
     public void move() {
         super.move();
+        if (target == null && enemies.size > 0) {
+            target = enemies.get(0);
+        }
+        if (enemies.size == 0){
+            aggro = AI_AGGRESSION_STATE.PASSIVE;
+        }
         range = Utils.distance(this.getCenterX(), this.getCenterY(), target.getCenterX(), target.getCenterY());
-
         if (target == null) {
-            this.sailState = 0;
-            this.aggro = AI_AGGRESSION_STATE.PASSIVE;
+            sailState = 0;
+            aggro = AI_AGGRESSION_STATE.PASSIVE;
         }
         if (hull == MAX_HULL * .10)
             aggro = AI_AGGRESSION_STATE.RUNNING;
@@ -107,6 +114,7 @@ public abstract class NPC_Ship extends Ship {
         }
         aggro_Color = aggro.getColor();
     }
+
 
     /**
      * Used only to calculate the proper direction in the next move
@@ -182,6 +190,20 @@ public abstract class NPC_Ship extends Ship {
         }
         else if (Utils.lineIntersectsRectangle(forwardAimingLine, target.getHitBox())){
             fireForwardCannons();
+        }
+    }
+
+    public void setEnemies(Array<Ship> enemies){
+        for (Ship enemy: enemies){
+            if (!this.enemies.contains(enemy, false)){
+                this.enemies.add(enemy);
+            }
+        }
+    }
+
+    public void addEnemy(Ship ship){
+        if (!this.enemies.contains(ship, false)){
+            this.enemies.add(ship);
         }
     }
 

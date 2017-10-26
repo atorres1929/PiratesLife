@@ -20,7 +20,6 @@ package info.datahelix.apirateslife.entity.Ships.NPC_Ships;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
-import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 
 /**
@@ -30,13 +29,12 @@ import info.datahelix.apirateslife.item.CannonType;
  */
 
 public class NPC_Brigantine extends NPC_Ship {
-    public NPC_Brigantine(String name, float x, float y, float rotation, Ship target, AI_AGGRESSION_STATE aggro){
+    public NPC_Brigantine(String name, float x, float y, float rotation, AI_AGGRESSION_STATE aggro){
         super(name, new Sprite(new Texture("ships/brigantine.png")),
                 x, y, rotation,
-                4, 1, 1,
-                new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
+                4, 1, 1, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
                 20, 200, 120, 3,
                 20,
-                target, aggro);
+                aggro);
     }
 }

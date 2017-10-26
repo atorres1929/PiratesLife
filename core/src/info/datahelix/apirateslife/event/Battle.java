@@ -17,16 +17,17 @@
 
 package info.datahelix.apirateslife.event;
 
-import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
-import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ships.Ship;
-import info.datahelix.apirateslife.utils.Utils;
-
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
+
+import info.datahelix.apirateslife.entity.CollideableEntity;
+import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.NPC_Ships.NPC_Ship;
+import info.datahelix.apirateslife.entity.Ships.Ship;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/19/2016
@@ -35,16 +36,13 @@ import com.badlogic.gdx.utils.Array;
 public class Battle {
 
     private Ship playerShip;
-    private Array<NPC_Ship> npc_ships;
     private SpriteBatch batch;
+    Array<CollideableEntity> collideables;
     private Camera camera;
 
-    public Battle(Player player, Array<Ship> npc_ships, OrthographicCamera camera, SpriteBatch batch){
+    public Battle(Player player, Array<CollideableEntity> collideables, OrthographicCamera camera, SpriteBatch batch){
         this.playerShip = player.getShip();
-        this.npc_ships = new Array<NPC_Ship>();
-        for (Ship ship: npc_ships){
-            this.npc_ships.add((NPC_Ship) ship);
-        }
+        this.collideables = collideables;
         this.camera = camera;
         this.batch = batch;
 
@@ -52,34 +50,41 @@ public class Battle {
 
     public void drawShips(SpriteBatch batch){
         playerShip.draw(batch);
-        for (NPC_Ship npc_ship: npc_ships) {
-            npc_ship.draw(batch);
+        for (CollideableEntity entity: collideables) {
+            entity.draw(batch);
         }
     }
 
 
     public void drawShapes(ShapeRenderer renderer){
-        for (NPC_Ship npc_ship: npc_ships) {
-            npc_ship.drawAILine(renderer);
-        }
-        if (Utils.DEBUG_LINES){
-            for (NPC_Ship npc_ship: npc_ships){
-                npc_ship.drawDebugLines(renderer);
+        for (CollideableEntity entity: collideables) {
+            if (entity instanceof NPC_Ship) {
+                NPC_Ship ship = (NPC_Ship) entity;
+                ship.drawAILine(renderer);
+                if (Utils.DEBUG_LINES){
+                    ship.drawDebugLines(renderer);
+                    playerShip.drawDebugLines(renderer);
+                }
             }
-            playerShip.drawDebugLines(renderer);
+
         }
+
     }
 
     public void update(){
         playerShip.move();
         playerShip.moveShots();
-        for (NPC_Ship enemy: npc_ships) {
-            if (enemy.isDead()){
-                enemy.disposeTextures();
-                npc_ships.removeValue(enemy, false);
+        for (CollideableEntity entity: collideables) {
+            if (entity instanceof NPC_Ship){
+                NPC_Ship ship = (NPC_Ship) entity;
+                if (ship.isDead()){
+                    ship.disposeTextures();
+                    collideables.removeValue(ship, false);
+                }
+                ship.move();
+                ship.moveShots();
             }
-            enemy.move();
-            enemy.moveShots();
+
         }
 
         camera.position.set(playerShip.getCenterPosition(), 0);
@@ -87,11 +92,13 @@ public class Battle {
     }
 
     public void disposeNPC_Textures(){
-        for (NPC_Ship npc_ship: npc_ships)
-            npc_ship.disposeTextures();
+        for (CollideableEntity entity: collideables)
+            entity.disposeTextures();
     }
 
     public Ship getPlayerShip(){return playerShip;}
-    public Array<NPC_Ship> getNPCShips(){return npc_ships;}
+
+    public Array<CollideableEntity> getCollideables(){return collideables;
+    }
 
 }

@@ -12,28 +12,25 @@
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity.Ships;
+package info.datahelix.apirateslife.entity;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 import info.datahelix.apirateslife.item.CannonType;
 
 /**
- * Created 10/20/2017
- *
- * @author Adam Torres
+ * Created by Adam Torres on 10/24/2017.
  */
 
-public class Gunboat extends Ship {
-    public Gunboat(String name, float x, float y, float rotation) {
-        super(name, new Sprite(new Texture("ships/gunboat.png")),
-                x, y, rotation,
-                1, 0, 0, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.SHORT_CANNON),
-                10, 100, 70, 5,
-                10);
-    }
+public interface CollideableEntity extends Entity {
+
+    void checkCollision(Rectangle rectangle);
+
+    void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target);
+
+    void setCollideables(Array<CollideableEntity> collideables);
 }

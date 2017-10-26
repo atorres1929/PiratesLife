@@ -399,7 +399,7 @@ implements <a href="../../../../info/datahelix/apirateslife/entity/Entity.html" 
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>protected com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../info/datahelix/apirateslife/entity/Ship.html#targets">targets</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../info/datahelix/apirateslife/entity/Ship.html#collideables">collideables</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected float</code></td>
@@ -632,7 +632,7 @@ implements <a href="../../../../info/datahelix/apirateslife/entity/Entity.html" 
 </tr>
 <tr id="i35" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../info/datahelix/apirateslife/entity/Ship.html#setTargets-com.badlogic.gdx.utils.Array-">setTargets</a></span>(com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt;&nbsp;targets)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../info/datahelix/apirateslife/entity/Ship.html#setTargets-com.badlogic.gdx.utils.Array-">setTargets</a></span>(com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt;&nbsp;collideables)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -788,13 +788,13 @@ implements <a href="../../../../info/datahelix/apirateslife/entity/Entity.html" 
 <pre>protected&nbsp;com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/CannonShot.html" title="class in info.datahelix.apirateslife.entity">CannonShot</a>&gt; cannonShots</pre>
 </li>
 </ul>
-<a name="targets">
+<a name="collideables">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>targets</h4>
-<pre>protected&nbsp;com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt; targets</pre>
+<h4>collideables</h4>
+<pre>protected&nbsp;com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt; collideables</pre>
 </li>
 </ul>
 <a name="cannonType">
@@ -1461,7 +1461,7 @@ implements <a href="../../../../info/datahelix/apirateslife/entity/Entity.html" 
 <ul class="blockList">
 <li class="blockList">
 <h4>setTargets</h4>
-<pre>public&nbsp;void&nbsp;setTargets(com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt;&nbsp;targets)</pre>
+<pre>public&nbsp;void&nbsp;setTargets(com.badlogic.gdx.utils.Array&lt;<a href="../../../../info/datahelix/apirateslife/entity/Ship.html" title="class in info.datahelix.apirateslife.entity">Ship</a>&gt;&nbsp;collideables)</pre>
 </li>
 </ul>
 <a name="setTarget-info.datahelix.apirateslife.entity.Ships.Ship-">
@@ -1535,7 +1535,7 @@ implements <a href="../../../../info/datahelix/apirateslife/entity/Entity.html" 
 <pre>public&nbsp;com.badlogic.gdx.graphics.g2d.Sprite&nbsp;getSprite()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../info/datahelix/apirateslife/entity/Entity.html#getSprite--">Entity</a></code></span></div>
 <div class="block">Get the sprite that the Entity is drawn from.
- All entities should have a sprite.</div>
+ All collideables should have a sprite.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../info/datahelix/apirateslife/entity/Entity.html#getSprite--">getSprite</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../info/datahelix/apirateslife/entity/Entity.html" title="interface in info.datahelix.apirateslife.entity">Entity</a></code></dd>

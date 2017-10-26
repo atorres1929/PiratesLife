@@ -2,9 +2,10 @@ package info.datahelix.apirateslife;
 
 import android.os.Bundle;
 
-import info.datahelix.apirateslife.main.Main;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+
+import info.datahelix.apirateslife.main.Main;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

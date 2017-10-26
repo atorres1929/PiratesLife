@@ -17,13 +17,6 @@
 
 package info.datahelix.apirateslife.screens;
 
-import info.datahelix.apirateslife.entity.CannonShot;
-import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ships.Brigantine;
-import info.datahelix.apirateslife.entity.Ships.Gunboat;
-import info.datahelix.apirateslife.entity.Ships.Ship;
-import info.datahelix.apirateslife.item.CannonType;
-import info.datahelix.apirateslife.utils.Utils;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -39,6 +32,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+
+import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.Gunboat;
+import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/24/2016

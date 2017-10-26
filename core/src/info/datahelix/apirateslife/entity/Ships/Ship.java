@@ -32,7 +32,7 @@ import info.datahelix.apirateslife.effect.CannonSmoke;
 import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
 import info.datahelix.apirateslife.effect.FadeOutEffect;
 import info.datahelix.apirateslife.entity.CannonShot;
-import info.datahelix.apirateslife.entity.Entity;
+import info.datahelix.apirateslife.entity.CollideableEntity;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.utils.Line;
@@ -42,7 +42,7 @@ import info.datahelix.apirateslife.utils.Utils;
  * Created 5/24/2016
  * @author Adam Torres
  */
-public abstract class Ship implements Entity, Cloneable{
+public abstract class Ship implements CollideableEntity, Cloneable{
 
     public enum Direction{LEFT, RIGHT, STRAIGHT}
 
@@ -56,7 +56,7 @@ public abstract class Ship implements Entity, Cloneable{
     protected final Sprite smoke;
 
     protected Array<CannonShot> cannonShots;
-    protected Array<Ship> targets;
+    protected Array<CollideableEntity> collideables;
     protected CannonType cannonType;
     protected CannonShot.CannonShotType loadedShot;
     protected final int MAX_CANNONS_SIDES, MAX_CANNONS_FRONT, MAX_CANNONS_BACK;
@@ -90,7 +90,8 @@ public abstract class Ship implements Entity, Cloneable{
     private final float SMOKE_CLOUD_TIME_TO_FADE = .5f;
     private final float SMOKE_CLOUD_ANIMATION_DELAY = .5f;
 
-    public Ship(String name, Sprite sprite, float x, float y, float rotation, int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
+    public Ship(String name, Sprite sprite, float x, float y, float rotation,
+                int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
                 int maxCrew, int maxHull, int maxSails, int maxSpeed,
                 int numSinkingClouds){
 
@@ -123,7 +124,6 @@ public abstract class Ship implements Entity, Cloneable{
         cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
         cannonShots = new Array<CannonShot>();
         reloadTime = 0.5f;
-        targets = new Array<Ship>();
         rightAimingLine = new Line();
         leftAimingLine = new Line();
         forwardAimingLine = new Line();
@@ -182,9 +182,9 @@ public abstract class Ship implements Entity, Cloneable{
                 cannonShots.removeValue(cannonShot, false);
             }
             else{
-                for (Ship target: targets){
-                    if (target.getHitBox().contains(cannonShot.getHitBox())) {
-                        target.hit(cannonShot, cannonType, target);
+                for (CollideableEntity entity: collideables){
+                    if (entity.getHitBox().contains(cannonShot.getHitBox())) {
+                        entity.hit(cannonShot, cannonType, entity);
                         cannonShot.disposeTextures();
                         cannonShots.removeValue(cannonShot, false);
                     }
@@ -197,56 +197,70 @@ public abstract class Ship implements Entity, Cloneable{
         }
     }
 
-    protected void hit(CannonShot cannonShot, CannonType cannonType, Ship target){
-        float hullDamage;
-        float sailDamage;
-        hullDamage = cannonType.getDamage()*cannonShot.getHullDamage();
-        sailDamage = cannonType.getDamage()*cannonShot.getSailDamage();
+    @Override
+    public void checkCollision(Rectangle rectangle) {
+        if (rectangle.overlaps(sprite.getBoundingRectangle())){
+            speed = 0;
+            sailState = 0;
+        }
+    }
 
-        target.hull -= hullDamage;
-        target.sails -= sailDamage;
+    @Override
+    public void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target){
+        if (target instanceof Ship) {
+            Ship ship = (Ship) target;
+            float hullDamage = cannonType.getDamage() * cannonShot.getHullDamage();
+            float sailDamage = cannonType.getDamage() * cannonShot.getSailDamage();
+
+            ship.hull -= hullDamage;
+            ship.sails -= sailDamage;
+        }
     }
 
     @Override
     public void move(){
-        if (hull > 0) {
-            if (rotation % DEGREES_360 == 0)
-                rotation = 0;
-            switch (dir) {
-                case STRAIGHT:
-                    break;
-                case LEFT:
-                    moveLeft();
-                    break;
-                case RIGHT:
-                    moveRight();
-                    break;
-            }
-            if (speed < sailState){
-                speed += 0.01f;
-            }
-            else{
-                speed -= 0.01f;
-            }
-            ensureWithinBorders();
 
-            double scale_X = Math.sin(Math.abs(rotation * Math.PI / DEGREES_180));
-            double scale_Y = Math.cos(Math.abs(rotation * Math.PI / DEGREES_180));
+        calculateAimingLines();
+        ensureWithinBorders();
 
-            double distance_X = (speed * scale_X);
-            double distance_Y = (speed * scale_Y);
-
-            if (rotation > DEGREES_0)
-                x -= distance_X;
-            else
-                x += distance_X;
-            if (rotation < DEGREES_90 && rotation > DEGREES_270)
-                y -= distance_Y;
-            else
-                y += distance_Y;
-
-            calculateAimingLines();
+        for (CollideableEntity entity: collideables) {
+            checkCollision(entity.getHitBox());
         }
+
+        if (rotation % DEGREES_360 == 0)
+            rotation = 0;
+        switch (dir) {
+            case STRAIGHT:
+                break;
+            case LEFT:
+                moveLeft();
+                break;
+            case RIGHT:
+                moveRight();
+                break;
+        }
+        if (speed < sailState){
+            speed += 0.01f;
+        }
+        else{
+            speed -= 0.01f;
+        }
+
+        double scale_X = Math.sin(Math.abs(rotation * Math.PI / DEGREES_180));
+        double scale_Y = Math.cos(Math.abs(rotation * Math.PI / DEGREES_180));
+
+        double distance_X = (speed * scale_X);
+        double distance_Y = (speed * scale_Y);
+
+        if (rotation > DEGREES_0)
+            x -= distance_X;
+        else
+            x += distance_X;
+        if (rotation < DEGREES_90 && rotation > DEGREES_270)
+            y -= distance_Y;
+        else
+            y += distance_Y;
+
     }
 
     /**
@@ -535,9 +549,21 @@ public abstract class Ship implements Entity, Cloneable{
         this.dir = dir;
     }
 
-    public void setTargets(Array<Ship> targets){this.targets = targets;}
-
-    public void setTarget(Ship target){this.targets.add(target);}
+    /**
+     * Adds the given Entity list to the list of existing collideable Entities. If any element in the given list is
+     * already within the Ship's collideables list, then the element is not added.
+     * <br>
+     * @param collideables the list of ships to be added to the ship's existing list of collideables.
+     */
+    @Override
+    public void setCollideables(Array<CollideableEntity> collideables){
+        this.collideables = new Array<CollideableEntity>();
+        //Necessary to create new array and copy values to avoid memory referencing errors
+        for (int i = 0; i < collideables.size; i++){
+            this.collideables.add(collideables.get(i));
+        }
+        this.collideables.removeValue(this, false);
+    }
 
     public void setHull(float hull){this.hull = hull;}
 

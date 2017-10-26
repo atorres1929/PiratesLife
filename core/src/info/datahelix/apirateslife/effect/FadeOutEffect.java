@@ -17,12 +17,12 @@
 
 package info.datahelix.apirateslife.effect;
 
-import info.datahelix.apirateslife.entity.Entity;
-import info.datahelix.apirateslife.utils.SpriteAccessor;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import aurelienribon.tweenengine.Tween;
+import info.datahelix.apirateslife.entity.Entity;
+import info.datahelix.apirateslife.utils.SpriteAccessor;
 
 /**
  * This class is used to fade out a single entity. The effect is done on the entity itself,

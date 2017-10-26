@@ -17,7 +17,6 @@
 
 package info.datahelix.apirateslife.screens;
 
-import info.datahelix.apirateslife.utils.SpriteAccessor;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -30,6 +29,7 @@ import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
+import info.datahelix.apirateslife.utils.SpriteAccessor;
 
 /**
  * Created 5/25/2016

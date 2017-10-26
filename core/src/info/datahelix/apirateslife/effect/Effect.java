@@ -17,13 +17,12 @@
 
 package info.datahelix.apirateslife.effect;
 
-import info.datahelix.apirateslife.utils.SpriteAccessor;
-
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
+import info.datahelix.apirateslife.utils.SpriteAccessor;
 
 /**
  * @author Adam Torres

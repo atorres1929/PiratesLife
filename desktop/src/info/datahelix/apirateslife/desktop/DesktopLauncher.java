@@ -2,6 +2,7 @@ package info.datahelix.apirateslife.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+
 import info.datahelix.apirateslife.main.Main;
 
 public class DesktopLauncher {

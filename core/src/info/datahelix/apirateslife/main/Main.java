@@ -17,12 +17,15 @@
 
 package info.datahelix.apirateslife.main;
 
-import info.datahelix.apirateslife.screens.MainMenu;
-import info.datahelix.apirateslife.screens.Splash;
-import info.datahelix.apirateslife.utils.Utils;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+
+import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.Gunboat;
+import info.datahelix.apirateslife.screens.BattleWorld;
+import info.datahelix.apirateslife.screens.Splash;
+import info.datahelix.apirateslife.utils.Utils;
 
 public class Main extends Game {
 
@@ -30,7 +33,8 @@ public class Main extends Game {
 	public void create () {
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		if (Utils.DISABLE_SPLASH){
-			setScreen(new MainMenu());
+			setScreen(new BattleWorld(new Player("Player",
+					new Gunboat("Player Ship", BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
 		}
 		else {
 			setScreen(new Splash());
