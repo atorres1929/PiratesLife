@@ -54,5 +54,6 @@ public class TestUtils {
     public void testPointRotation8(){
         Assert.assertEquals(new Vector2((float) Math.sqrt(2), 0), Utils.rotatePoint(0, 0, 45, new Vector2(1, 1)));
     }
+
 }
 

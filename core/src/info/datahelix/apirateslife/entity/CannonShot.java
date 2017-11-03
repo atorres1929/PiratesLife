@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.utils.Utils;
 
@@ -31,7 +32,7 @@ import info.datahelix.apirateslife.utils.Utils;
  * Created 5/29/2016
  * @author Adam Torres
  */
-public class CannonShot implements CollideableEntity{
+public class CannonShot extends CollideableEntity{
 
     public enum CannonShotType{
 
@@ -73,13 +74,12 @@ public class CannonShot implements CollideableEntity{
     private static final float grapeShotSailDamage = .10f;
     private static final float bombShotHullDamage = 2f;
     private static final float bombShotSailDamage = .75f;
-    private final int speed = 15;
-    private float x,y,rotation;
-    private float range;
-    private float imageRotation;
-    private CannonShotType cannonShotType;
-    private Sprite image;
-
+    protected final int speed = 15;
+    protected float x,y,rotation;
+    protected float range;
+    protected float imageRotation;
+    protected CannonShotType cannonShotType;
+    protected Sprite image;
 
     /**
      * Constructs a CannonShot based on a {@link CannonShotType} at specified coordinates
@@ -141,18 +141,20 @@ public class CannonShot implements CollideableEntity{
     }
 
     @Override
-    public void checkCollision(Rectangle rectangle) {
-
+    public boolean checkCollision(Entity entity) {
+        if (this.getHitBox().overlaps(entity.getHitBox())){
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target) {
-
-    }
-
-    @Override
-    public void setCollideables(Array<CollideableEntity> collideables) {
-
+    public void hit(CollideableEntity target, float... damages) {
+        if (target instanceof Ship){
+            Ship ship = (Ship) target;
+            ship.damageHull(damages[0] + damages[1]);
+            ship.damageSail(damages[0] + damages[2]);
+        }
     }
 
     public Rectangle getHitBox(){return image.getBoundingRectangle();}

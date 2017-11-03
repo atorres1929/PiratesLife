@@ -33,6 +33,7 @@ import info.datahelix.apirateslife.effect.FadeInFadeOutEffectArea;
 import info.datahelix.apirateslife.effect.FadeOutEffect;
 import info.datahelix.apirateslife.entity.CannonShot;
 import info.datahelix.apirateslife.entity.CollideableEntity;
+import info.datahelix.apirateslife.entity.Entity;
 import info.datahelix.apirateslife.item.CannonType;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.utils.Line;
@@ -42,7 +43,7 @@ import info.datahelix.apirateslife.utils.Utils;
  * Created 5/24/2016
  * @author Adam Torres
  */
-public abstract class Ship implements CollideableEntity, Cloneable{
+public abstract class Ship extends CollideableEntity implements Entity, Cloneable{
 
     public enum Direction{LEFT, RIGHT, STRAIGHT}
 
@@ -51,12 +52,10 @@ public abstract class Ship implements CollideableEntity, Cloneable{
     protected final float DEGREES_180 = 180;
     protected final float DEGREES_90 = 90;
     protected final float DEGREES_0 = 0;
-    protected final int HOW_FAR_FROM_SHIP = 100;
     protected final Sprite sprite;
     protected final Sprite smoke;
 
     protected Array<CannonShot> cannonShots;
-    protected Array<CollideableEntity> collideables;
     protected CannonType cannonType;
     protected CannonShot.CannonShotType loadedShot;
     protected final int MAX_CANNONS_SIDES, MAX_CANNONS_FRONT, MAX_CANNONS_BACK;
@@ -182,9 +181,11 @@ public abstract class Ship implements CollideableEntity, Cloneable{
                 cannonShots.removeValue(cannonShot, false);
             }
             else{
-                for (CollideableEntity entity: collideables){
-                    if (entity.getHitBox().contains(cannonShot.getHitBox())) {
-                        entity.hit(cannonShot, cannonType, entity);
+                for (CollideableEntity entity: collideables) {
+                    if (entity.checkCollision(cannonShot)) {
+                        if (entity instanceof Ship) {
+                            cannonShot.hit(entity, cannonType.getDamage(), cannonShot.getHullDamage(), cannonShot.getSailDamage());
+                        }
                         cannonShot.disposeTextures();
                         cannonShots.removeValue(cannonShot, false);
                     }
@@ -198,22 +199,19 @@ public abstract class Ship implements CollideableEntity, Cloneable{
     }
 
     @Override
-    public void checkCollision(Rectangle rectangle) {
-        if (rectangle.overlaps(sprite.getBoundingRectangle())){
-            speed = 0;
-            sailState = 0;
-        }
+    public void hit(CollideableEntity entity, float... damage){
+
     }
 
     @Override
-    public void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target){
-        if (target instanceof Ship) {
-            Ship ship = (Ship) target;
-            float hullDamage = cannonType.getDamage() * cannonShot.getHullDamage();
-            float sailDamage = cannonType.getDamage() * cannonShot.getSailDamage();
-
-            ship.hull -= hullDamage;
-            ship.sails -= sailDamage;
+    public boolean checkCollision(Entity entity) {
+        if (this.getHitBox().overlaps(entity.getHitBox())){
+            speed = 1;
+            return true;
+        }
+        else {
+            speed = sailState;
+            return false;
         }
     }
 
@@ -224,7 +222,7 @@ public abstract class Ship implements CollideableEntity, Cloneable{
         ensureWithinBorders();
 
         for (CollideableEntity entity: collideables) {
-            checkCollision(entity.getHitBox());
+            checkCollision(entity);
         }
 
         if (rotation % DEGREES_360 == 0)
@@ -549,21 +547,11 @@ public abstract class Ship implements CollideableEntity, Cloneable{
         this.dir = dir;
     }
 
-    /**
-     * Adds the given Entity list to the list of existing collideable Entities. If any element in the given list is
-     * already within the Ship's collideables list, then the element is not added.
-     * <br>
-     * @param collideables the list of ships to be added to the ship's existing list of collideables.
-     */
-    @Override
-    public void setCollideables(Array<CollideableEntity> collideables){
-        this.collideables = new Array<CollideableEntity>();
-        //Necessary to create new array and copy values to avoid memory referencing errors
-        for (int i = 0; i < collideables.size; i++){
-            this.collideables.add(collideables.get(i));
-        }
-        this.collideables.removeValue(this, false);
-    }
+    public void damageHull(float damage){this.hull -= damage;}
+
+    public void damageSail(float damage){this.sails -= damage;}
+
+    public void damageCrew(float damage){this.crew -= damage;}
 
     public void setHull(float hull){this.hull = hull;}
 
@@ -596,8 +584,12 @@ public abstract class Ship implements CollideableEntity, Cloneable{
      * 90 Degrees is added to the original computation to make 0 degrees North of the Ship
      * @return The position in front of the ship
      */
-    public Vector2 getPositionFrontOfShip(){return new Vector2( (float) (x+(HOW_FAR_FROM_SHIP*Math.cos((Math.toRadians(rotation+90))))),
-                                                                (float) (y+(HOW_FAR_FROM_SHIP*Math.sin((Math.toRadians(rotation+90))))));}
+    public Vector2 getPositionFrontOfShip(){
+        final int HOW_FAR_FROM_SHIP = 100;
+        return new Vector2( (float) (x+(HOW_FAR_FROM_SHIP*Math.cos((Math.toRadians(rotation+90))))),
+                            (float) (y+(HOW_FAR_FROM_SHIP*Math.sin((Math.toRadians(rotation+90)))))
+        );
+    }
     @Override
     public float getX(){return x;}
     @Override
