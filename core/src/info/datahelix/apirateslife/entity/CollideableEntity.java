@@ -17,20 +17,36 @@
 
 package info.datahelix.apirateslife.entity;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-
-import info.datahelix.apirateslife.item.CannonType;
 
 /**
  * Created by Adam Torres on 10/24/2017.
  */
 
-public interface CollideableEntity extends Entity {
+public abstract class CollideableEntity implements Entity{
 
-    void checkCollision(Rectangle rectangle);
+    protected Array<CollideableEntity> collideables;
 
-    void hit(CannonShot cannonShot, CannonType cannonType, CollideableEntity target);
+    /**
+     * Checks if this entity's sprite is colliding with some other rectangle (a sprite usually) and
+     * performs an action based on the entity's purpose.
+     * @param entity the entity to check collision against
+     */
+    public abstract boolean checkCollision(Entity entity);
 
-    void setCollideables(Array<CollideableEntity> collideables);
+    public abstract void hit(CollideableEntity entity, float... damage);
+
+    /**
+     * Copies all values in the list to this objects collideables list.
+     * If this object exists within the list, it is removed.
+     * Necessary for checking of collisions.
+     * @param collideables the list of CollideableEntites to be copied
+     */
+    public void setCollideables(Array<CollideableEntity> collideables) {
+        this.collideables = new Array<CollideableEntity>();
+        for (int i = 0; i < collideables.size; i++){
+            this.collideables.add(collideables.get(i));
+        }
+        this.collideables.removeValue(this, false);
+    }
 }
