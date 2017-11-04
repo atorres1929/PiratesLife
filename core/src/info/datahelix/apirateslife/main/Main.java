@@ -22,6 +22,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 import info.datahelix.apirateslife.entity.Player;
+import info.datahelix.apirateslife.entity.Ships.Brigantine;
 import info.datahelix.apirateslife.entity.Ships.Gunboat;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.screens.Splash;
@@ -34,7 +35,7 @@ public class Main extends Game {
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		if (Utils.DISABLE_SPLASH){
 			setScreen(new BattleWorld(new Player("Player",
-					new Gunboat("Player Ship", BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
+					new Brigantine("Player Ship", BattleWorld.WORLD_SIZE/2, BattleWorld.WORLD_SIZE/2, 0))));
 		}
 		else {
 			setScreen(new Splash());

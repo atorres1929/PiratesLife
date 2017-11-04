@@ -77,7 +77,7 @@ public class Battle {
         for (CollideableEntity entity: collideables) {
             if (entity instanceof NPC_Ship){
                 NPC_Ship ship = (NPC_Ship) entity;
-                if (ship.isDead()){
+                if (ship.isDisposable()){
                     ship.disposeTextures();
                     collideables.removeValue(ship, false);
                 }

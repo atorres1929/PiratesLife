@@ -76,6 +76,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     protected float sails;
     protected float speed;
     protected boolean dead;
+    protected boolean disposable;
     protected float x, y, rotation;
 
     private FadeInFadeOutEffectArea sinkingSmoke;
@@ -155,11 +156,11 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
         sprite.draw(batch);
 
         if (hull <= 0){
+            this.dead = true;
             sinkingFadingAway.animate(batch, Utils.DELTA);
             sinkingSmoke.animate(batch, Utils.DELTA);
-
             if (sinkingSmoke.done()){
-                this.dead = true;
+                disposable = true;
             }
         }
     }
@@ -205,12 +206,22 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
 
     @Override
     public boolean checkCollision(Entity entity) {
-        if (this.getHitBox().overlaps(entity.getHitBox())){
-            speed = 1;
+        if (this.getHitBox().overlaps(entity.getHitBox())) {
+            if (!dead) {
+                speed = 1;
+            }
+            else{
+                speed = 0;
+            }
             return true;
         }
         else {
-            speed = sailState;
+            if (!dead){
+                speed = sailState;
+            }
+            else{
+                speed = 0;
+            }
             return false;
         }
     }
@@ -222,26 +233,36 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
         ensureWithinBorders();
 
         for (CollideableEntity entity: collideables) {
-            checkCollision(entity);
+            if (checkCollision(entity)){
+                //do stuff related to collision
+//                hit(entity, );
+            }
         }
 
-        if (rotation % DEGREES_360 == 0)
+        if (rotation % DEGREES_360 == 0) {
             rotation = 0;
-        switch (dir) {
-            case STRAIGHT:
-                break;
-            case LEFT:
-                moveLeft();
-                break;
-            case RIGHT:
-                moveRight();
-                break;
         }
-        if (speed < sailState){
-            speed += 0.01f;
+        if (!dead) {
+            switch (dir) {
+                case STRAIGHT:
+                    break;
+                case LEFT:
+                    moveLeft();
+                    break;
+                case RIGHT:
+                    moveRight();
+                    break;
+            }
+            if (speed < sailState) {
+                speed += 0.01f;
+            } else {
+                speed -= 0.01f;
+            }
         }
         else{
-            speed -= 0.01f;
+            if (speed > 0) {
+                speed -= 0.5f;
+            }
         }
 
         double scale_X = Math.sin(Math.abs(rotation * Math.PI / DEGREES_180));
@@ -616,6 +637,8 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     public float getSails(){return sails;}
 
     public boolean isDead(){return dead;}
+
+    public boolean isDisposable(){return disposable;}
 
     /**
      * Disposes all textures that the given ship uses. Should never be called on player directly, as textures should remain between battles.
