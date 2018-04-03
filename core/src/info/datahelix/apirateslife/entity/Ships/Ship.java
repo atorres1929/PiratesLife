@@ -208,7 +208,8 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     public boolean checkCollision(Entity entity) {
         if (this.getHitBox().overlaps(entity.getHitBox())) {
             if (!dead) {
-                speed = 1;
+                //TODO fix collision code
+//                speed = 1;
             }
             else{
                 speed = 0;

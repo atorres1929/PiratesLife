@@ -49,11 +49,12 @@ import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/26/2016
+ *
  * @author Adam Torres
  */
-public class BattleWorld implements Screen, InputProcessor, GestureDetector.GestureListener{
+public class BattleWorld implements Screen, InputProcessor, GestureDetector.GestureListener {
 
-    private enum GameState{PAUSED, RUNNING}
+    private enum GameState {PAUSED, RUNNING}
 
     public static final int WORLD_SIZE = 10000;
     private final float STARTING_ZOOM = 0.25f;
@@ -69,15 +70,16 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
     private Viewport viewport;
-    public BattleWorld(Player player){
+
+    public BattleWorld(Player player) {
         Array<CollideableEntity> collideables = new Array<CollideableEntity>();
         collideables.add(player.getShip());
-        collideables.add(new NPC_Brigantine("Boat 1", player.getShip().getX()-500, player.getShip().getY(), 0, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
-        collideables.add(new NPC_Gunboat("Boat 2", player.getShip().getX()+500, player.getShip().getY(), 180, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
-        for (CollideableEntity collideable: collideables){
+        collideables.add(new NPC_Brigantine("Boat 1", player.getShip().getX() - 500, player.getShip().getY(), 0, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+        collideables.add(new NPC_Gunboat("Boat 2", player.getShip().getX() + 500, player.getShip().getY(), 180, NPC_Ship.AI_AGGRESSION_STATE.CHASE));
+        for (CollideableEntity collideable : collideables) {
             collideable.setCollideables(collideables);
-            if (collideable instanceof Ship){
-                if (collideable instanceof NPC_Ship){
+            if (collideable instanceof Ship) {
+                if (collideable instanceof NPC_Ship) {
                     ((NPC_Ship) collideable).addEnemy(player.getShip());
                 }
             }
@@ -128,8 +130,7 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
             battle.drawShapes(shapeRenderer);
             shapeRenderer.end();
 
-        }
-        else if (gameState == GameState.PAUSED){
+        } else if (gameState == GameState.PAUSED) {
             ((Game) Gdx.app.getApplicationListener()).setScreen(new PauseMenu(this));
         }
     }
@@ -176,19 +177,17 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-        if (x < Gdx.graphics.getWidth()/4)
+        if (x < Gdx.graphics.getWidth() / 8)
             battle.getPlayerShip().setDirection(Ship.Direction.LEFT);
-        else if (x > Gdx.graphics.getWidth()*3/4)
+        else if (x > Gdx.graphics.getWidth() * 7 / 8)
             battle.getPlayerShip().setDirection(Ship.Direction.RIGHT);
-        else
+        else if (x > Gdx.graphics.getWidth() * 3 / 8 && x < Gdx.graphics.getWidth() * 5 / 8)
             battle.getPlayerShip().setDirection(Ship.Direction.STRAIGHT);
 
-        if (x > Gdx.graphics.getWidth()/4 && x < Gdx.graphics.getWidth()/2){
+        if (x > Gdx.graphics.getWidth() / 4 && x < Gdx.graphics.getWidth() / 2)
             battle.getPlayerShip().fireLeftCannons();
-        }
-        else if (x < Gdx.graphics.getWidth()*3/4 && x > Gdx.graphics.getWidth()/2){
+        else if (x < Gdx.graphics.getWidth() * 3 / 4 && x > Gdx.graphics.getWidth() / 2)
             battle.getPlayerShip().fireRightCannons();
-        }
 
         return false;
     }
@@ -219,9 +218,9 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
 
     @Override
     public boolean zoom(float initialDistance, float distance) {
-        if (initialDistance < distance && camera.zoom-0.01f > 0f)
+        if (initialDistance < distance && camera.zoom - 0.01f > 0f)
             camera.zoom -= 0.01f;
-        else if (camera.zoom+0.01f < 2f)
+        else if (camera.zoom + 0.01f < 2f)
             camera.zoom += 0.01f;
         Utils.refreshVieport(viewport);
         return true;
@@ -287,7 +286,9 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
     }
 
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -306,8 +307,8 @@ public class BattleWorld implements Screen, InputProcessor, GestureDetector.Gest
 
     @Override
     public boolean scrolled(int amount) {
-        if ((camera.zoom + amount*.1) > 0f && (camera.zoom +amount*.1) < .5f)
-            camera.zoom += (float) amount*.1;
+        if ((camera.zoom + amount * .1) > 0f && (camera.zoom + amount * .1) < .5f)
+            camera.zoom += (float) amount * .1;
         camera.update();
         Utils.refreshVieport(viewport);
         return true;

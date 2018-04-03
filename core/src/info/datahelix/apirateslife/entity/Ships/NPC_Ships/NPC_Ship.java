@@ -117,7 +117,8 @@ public abstract class NPC_Ship extends Ship {
 
 
     /**
-     * Used only to calculate the proper direction in the next move
+     * Used only to calculate the proper direction in the next move.
+     * Necessary to use the super class's unmodified move method.
      */
     private void moveProjection() {
         super.move();
