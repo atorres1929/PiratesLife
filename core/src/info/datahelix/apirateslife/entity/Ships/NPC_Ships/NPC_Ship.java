@@ -62,7 +62,6 @@ public abstract class NPC_Ship extends Ship {
     protected Ship target;
     protected float range;
     private float angleToTarget;
-    private float projectedAngleToTarget;
     private AI_AGGRESSION_STATE aggro;
     private Color aggro_Color;
 
@@ -141,27 +140,9 @@ public abstract class NPC_Ship extends Ship {
         angleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
     }
 
-    private void calculateNextMove() {
-
-        try {
-            NPC_Ship ship = (NPC_Ship) this.clone();
-            ship.moveProjection();
-            Vector2 A = target.getPosition();
-            Vector2 B = ship.getPosition();
-            Vector2 C = ship.getPositionFrontOfShip();
-            float a = Utils.distance(C, B);
-            float b = Utils.distance(C, A);
-            float c = Utils.distance(A, B);
-
-            projectedAngleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * Used in the RUNNING AI, to see which path better leads to running away effectively from the target
+     *
      * @param direction The direction to test
      * @return The angle of the between this ship and the target, based upon moving in the direction
      * provided
@@ -178,8 +159,7 @@ public abstract class NPC_Ship extends Ship {
             float b = Utils.distance(C, A);
             float c = Utils.distance(A, B);
 
-            float projectedAngleToTarget = (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
-            return projectedAngleToTarget;
+            return (float) Math.toDegrees(Math.acos(((a * a + c * c - b * b) / (2 * a * c))));
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             return -1f;
@@ -213,11 +193,11 @@ public abstract class NPC_Ship extends Ship {
     }
 
     private void broadSideAI() {
-        if (angleToTarget < DEGREES_90) {
+        if (angleToTarget < DEGREES_90)
             dir = Direction.RIGHT;
-        } else if (angleToTarget >= DEGREES_90) {
+        else if (angleToTarget >= DEGREES_90)
             dir = Direction.LEFT;
-        }
+
     }
 
 
@@ -225,21 +205,18 @@ public abstract class NPC_Ship extends Ship {
         if (angleToTarget < 1) {
             dir = Direction.STRAIGHT;
             return;
-
         }
 
-        if (projectedAngleToTarget > angleToTarget) {
-            if (dir == Direction.LEFT) {
+        if (calculateNextMoveDirection(dir) > angleToTarget) {
+            if (dir == Direction.LEFT)
                 dir = Direction.RIGHT;
-            } else {
+            else
                 dir = Direction.LEFT;
-            }
         }
     }
 
     private void attackAI() {
         calculateAngleToTarget();
-        calculateNextMove();
         if (range < cannonRange * 7 / 8)
             aggro = AI_AGGRESSION_STATE.BROADSIDE;
         else if (range >= cannonRange)
@@ -267,11 +244,9 @@ public abstract class NPC_Ship extends Ship {
             dir = Direction.LEFT;
         else
             dir = Direction.RIGHT;
-
     }
 
     private void passiveAI() {
-
         dir = Direction.STRAIGHT;
     }
 
