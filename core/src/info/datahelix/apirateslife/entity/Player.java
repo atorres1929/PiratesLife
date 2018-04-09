@@ -20,19 +20,21 @@ package info.datahelix.apirateslife.entity;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import info.datahelix.apirateslife.entity.Ships.Ship;
+
 /**
  * Created 5/26/2016
  * @author Adam Torres
  */
 public class Player extends Person {
 
-    private info.datahelix.apirateslife.entity.Ships.Ship ship;
-    public Player(String name, info.datahelix.apirateslife.entity.Ships.Ship ship){
+    private Ship ship;
+    public Player(String name, Ship ship){
         super(name, 100, new Sprite(new Texture("people/player.png")));
         this.ship = ship;
     }
 
-    public info.datahelix.apirateslife.entity.Ships.Ship getShip(){return ship;}
+    public Ship getShip(){return ship;}
 
 
 }

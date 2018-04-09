@@ -129,6 +129,9 @@ public abstract class NPC_Ship extends Ship {
         shapeRenderer.line(this.getCenterPosition(), target.getCenterPosition());
     }
 
+    /**
+     * Calculates the current angle between the target and this ship
+     */
     private void calculateAngleToTarget() {
         Vector2 A = target.getPosition();
         Vector2 B = this.getPosition();
