@@ -41,11 +41,12 @@ import info.datahelix.apirateslife.utils.Utils;
 
 /**
  * Created 5/24/2016
+ *
  * @author Adam Torres
  */
-public abstract class Ship extends CollideableEntity implements Entity, Cloneable{
+public abstract class Ship extends CollideableEntity implements Entity, Cloneable {
 
-    public enum Direction{LEFT, RIGHT, STRAIGHT}
+    public enum Direction {LEFT, RIGHT, STRAIGHT}
 
     protected final float DEGREES_360 = 360;
     protected final float DEGREES_270 = 270;
@@ -90,10 +91,12 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     private final float SMOKE_CLOUD_TIME_TO_FADE = .5f;
     private final float SMOKE_CLOUD_ANIMATION_DELAY = .5f;
 
+    private final float mass = 10.0f; //TODO change mass for all ships to be different
+
     public Ship(String name, Sprite sprite, float x, float y, float rotation,
                 int maxCannonsSides, int maxCannonsFront, int maxCannonsBack, CannonType cannonType,
                 int maxCrew, int maxHull, int maxSails, int maxSpeed,
-                int numSinkingClouds){
+                int numSinkingClouds) {
 
         this.name = name;
         this.sprite = sprite;
@@ -119,9 +122,9 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
         cannonSmokes = new Array<CannonSmoke>();
         this.sprite.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         this.sprite.setOriginCenter();
-        this.sprite.setPosition(x,y);
+        this.sprite.setPosition(x, y);
         this.sprite.setRotation(rotation);
-        cannonRange = cannonType.getRange()+cannonType.getRange()*loadedShot.getRangePercentage();
+        cannonRange = cannonType.getRange() + cannonType.getRange() * loadedShot.getRangePercentage();
         cannonShots = new Array<CannonShot>();
         reloadTime = 0.5f;
         rightAimingLine = new Line();
@@ -132,40 +135,41 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
 
     /**
      * Draws the ship at the appropriate location and appropriate rotation.
+     *
      * @param batch the batch that the ship is drawn from.
      */
     @Override
-    public void draw(SpriteBatch batch){
-        for (CannonShot cannonShot: cannonShots) {
+    public void draw(SpriteBatch batch) {
+        for (CannonShot cannonShot : cannonShots) {
             cannonShot.draw(batch);
         }
 
 
-        for (CannonSmoke smoke: cannonSmokes){
+        for (CannonSmoke smoke : cannonSmokes) {
             smoke.animate(batch, Utils.DELTA);
-            if (smoke.done()){
+            if (smoke.done()) {
                 cannonSmokes.removeValue(smoke, false);
             }
         }
 
-        healthDisplay.draw(batch, ""+hull, x, y);
+        healthDisplay.draw(batch, "" + hull, x, y);
 
         //draw ship last
-        sprite.setPosition(x,y);
+        sprite.setPosition(x, y);
         sprite.setRotation(rotation);
         sprite.draw(batch);
 
-        if (hull <= 0){
+        if (hull <= 0) {
             this.dead = true;
             sinkingFadingAway.animate(batch, Utils.DELTA);
             sinkingSmoke.animate(batch, Utils.DELTA);
-            if (sinkingSmoke.done()){
+            if (sinkingSmoke.done()) {
                 disposable = true;
             }
         }
     }
 
-    public void drawDebugLines(ShapeRenderer shapeRenderer){
+    public void drawDebugLines(ShapeRenderer shapeRenderer) {
         shapeRenderer.setColor(Color.RED);
         Rectangle rect = getHitBox();
         shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
@@ -175,14 +179,13 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
         shapeRenderer.line(backwardAimingLine.getPos1(), backwardAimingLine.getPos2());
     }
 
-    public void moveShots(){
-        for (CannonShot cannonShot: cannonShots){
-            if (cannonShot.getRange() >= cannonRange) {
+    public void moveShots() {
+        for (CannonShot cannonShot : cannonShots) {
+            if (cannonShot.getRange() > cannonRange) {
                 cannonShot.disposeTextures();
                 cannonShots.removeValue(cannonShot, false);
-            }
-            else{
-                for (CollideableEntity entity: collideables) {
+            } else {
+                for (CollideableEntity entity : collideables) {
                     if (entity.checkCollision(cannonShot)) {
                         if (entity instanceof Ship) {
                             cannonShot.hit(entity, cannonType.getDamage(), cannonShot.getHullDamage(), cannonShot.getSailDamage());
@@ -194,48 +197,41 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
             }
             cannonShot.move();
         }
-        for (CannonSmoke smoke: cannonSmokes){
+        for (CannonSmoke smoke : cannonSmokes) {
             smoke.move();
         }
     }
 
+    //Should be used for when this entity hits another, e.g. Ship hits another Ship, rocks, etc.
     @Override
-    public void hit(CollideableEntity entity, float... damage){
+    public void hit(CollideableEntity entity, float... damage) {
+        //TODO attach this to collision code
 
+        //Get the mtd
+        Vector2 delta = this.getCenterPosition().sub(entity.getCenterPosition());
+        float d = delta.len();
+        //minimum translation distance to push the ships apart after intersecting
+        Vector2 minimumTranslationDistance = delta.scl(((this.getSprite().getHeight() / 2 + entity.getSprite().getHeight() / 2) - d) / d);
+
+        //resolve intersection
+        //inverse mass quantities
     }
 
     @Override
     public boolean checkCollision(Entity entity) {
-        if (this.getHitBox().overlaps(entity.getHitBox())) {
-            if (!dead) {
-                //TODO fix collision code
-//                speed = 1;
-            }
-            else{
-                speed = 0;
-            }
-            return true;
-        }
-        else {
-            if (!dead){
-                speed = sailState;
-            }
-            else{
-                speed = 0;
-            }
-            return false;
-        }
+        return this.getHitBox().overlaps(entity.getHitBox());
     }
 
+
     @Override
-    public void move(){
+    public void move() {
 
         calculateAimingLines();
         ensureWithinBorders();
 
-        for (CollideableEntity entity: collideables) {
-            if (checkCollision(entity)){
-                //do stuff related to collision
+        for (CollideableEntity entity : collideables) {
+            if (checkCollision(entity)) {
+                //TODO do stuff related to collision
 //                hit(entity, );
             }
         }
@@ -259,8 +255,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
             } else {
                 speed -= 0.01f;
             }
-        }
-        else{
+        } else {
             if (speed > 0) {
                 speed -= 0.5f;
             }
@@ -286,20 +281,17 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     /**
      * Ensures the ship is still in the borders of the map, and if not, places is back in the borders with it's rotation reversed.
      */
-    private void ensureWithinBorders(){
-        if (x > BattleWorld.WORLD_SIZE-sprite.getWidth()) {
+    private void ensureWithinBorders() {
+        if (x > BattleWorld.WORLD_SIZE - sprite.getWidth()) {
             rotation += DEGREES_180;
             x -= 10;
-        }
-        else if  (x < 0+sprite.getWidth()) {
+        } else if (x < 0 + sprite.getWidth()) {
             rotation += DEGREES_180;
             x += 10;
-        }
-        else if (y > BattleWorld.WORLD_SIZE-sprite.getHeight()){
+        } else if (y > BattleWorld.WORLD_SIZE - sprite.getHeight()) {
             rotation += DEGREES_180;
             y -= 10;
-        }
-        else if (y < 0+sprite.getHeight()){
+        } else if (y < 0 + sprite.getHeight()) {
             rotation += DEGREES_180;
             y += 10;
         }
@@ -308,21 +300,25 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     /**
      * Increases the rotation of the ship by 1 degree. Based on a circle of 360 degrees where 0 degrees is North of the ship.
      */
-    private void moveLeft(){rotation++;}
+    private void moveLeft() {
+        rotation++;
+    }
 
     /**
      * Reduces the rotation of the ship by 1 degree. Based on a circle of 360 degrees where 0 degrees is North of the ship.
      */
-    private void moveRight(){rotation--;}
+    private void moveRight() {
+        rotation--;
+    }
 
-    public void fireForwardCannons(){
-        if ((System.currentTimeMillis() - reloadTimerForward)/1000 >= reloadTime * cannonsForward) {
+    public void fireForwardCannons() {
+        if ((System.currentTimeMillis() - reloadTimerForward) / 1000 >= reloadTime * cannonsForward) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
             Vector2 cannonAndSmokePos = new Vector2();
 
-            if (cannonsForward == 1){
+            if (cannonsForward == 1) {
                 cannonAndSmokePos.x = getCenterX();
                 cannonAndSmokePos.y = getCenterY();
                 cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
@@ -330,8 +326,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                 cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
-            }
-            else {
+            } else {
                 //Used to flip between placing a shot on the left or right of the ship
                 boolean flip = true;
                 int cannonSeparationLeft = 16;
@@ -343,8 +338,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                         cannonAndSmokePos.x = getCenterX() - cannonSeparationLeft;
                         cannonAndSmokePos.y = getCenterY();
                         cannonSeparationLeft += 16;
-                    }
-                    else {
+                    } else {
                         flip = true;
                         cannonAndSmokePos.x = getCenterX() + cannonSeparationRight;
                         cannonAndSmokePos.y = getCenterY();
@@ -361,14 +355,14 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
         }
     }
 
-    public void fireBackCannons(){
-        if ((System.currentTimeMillis() - reloadTimerBack)/1000 >= reloadTime * cannonsBack) {
+    public void fireBackCannons() {
+        if ((System.currentTimeMillis() - reloadTimerBack) / 1000 >= reloadTime * cannonsBack) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
             Vector2 cannonAndSmokePos = new Vector2();
 
-            if (cannonsBack == 1){
+            if (cannonsBack == 1) {
                 cannonAndSmokePos.x = getCenterX();
                 cannonAndSmokePos.y = getCenterY();
                 cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
@@ -376,8 +370,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                 cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_180);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
-            }
-            else {
+            } else {
                 //Used to flip between placing a shot on the left or right of the ship
                 boolean flip = true;
                 int cannonSeparationLeft = 16;
@@ -389,8 +382,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                         cannonAndSmokePos.x = getCenterX() - cannonSeparationLeft;
                         cannonAndSmokePos.y = getCenterY();
                         cannonSeparationLeft += 16;
-                    }
-                    else {
+                    } else {
                         flip = true;
                         cannonAndSmokePos.x = getCenterX() + cannonSeparationRight;
                         cannonAndSmokePos.y = getCenterY();
@@ -408,13 +400,13 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     }
 
 
-    public void fireLeftCannons(){
-        if ((System.currentTimeMillis() - reloadTimerLeft)/1000 >= reloadTime * cannonsLeft) {
+    public void fireLeftCannons() {
+        if ((System.currentTimeMillis() - reloadTimerLeft) / 1000 >= reloadTime * cannonsLeft) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
             Vector2 cannonAndSmokePos = new Vector2();
-            if (cannonsLeft == 1){
+            if (cannonsLeft == 1) {
                 cannonAndSmokePos.x = getCenterX();
                 cannonAndSmokePos.y = getCenterY();
                 cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
@@ -422,8 +414,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                 cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation + DEGREES_90);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
-            }
-            else {
+            } else {
                 //Used to flip between placing a shot on the left or right of the ship
                 boolean flip = true;
                 int cannonSeparationBackward = 16;
@@ -453,13 +444,13 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     }
 
 
-    public void fireRightCannons(){
-        if ((System.currentTimeMillis() - reloadTimerRight)/1000 >= reloadTime * cannonsRight) {
+    public void fireRightCannons() {
+        if ((System.currentTimeMillis() - reloadTimerRight) / 1000 >= reloadTime * cannonsRight) {
 
             CannonShot cannonShot;
             CannonSmoke cannonSmoke;
             Vector2 cannonAndSmokePos = new Vector2();
-            if (cannonsRight == 1){
+            if (cannonsRight == 1) {
                 cannonAndSmokePos.x = getCenterX();
                 cannonAndSmokePos.y = getCenterY();
                 cannonAndSmokePos = Utils.rotatePoint(getCenterX(), getCenterY(), DEGREES_180 - rotation, cannonAndSmokePos);
@@ -467,8 +458,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
                 cannonSmoke = new CannonSmoke(smoke, SMOKE_CLOUD_TIME_TO_FADE, SMOKE_CLOUD_ANIMATION_DELAY, cannonAndSmokePos.x, cannonAndSmokePos.y, rotation - DEGREES_90);
                 cannonSmokes.add(cannonSmoke);
                 cannonShots.add(cannonShot);
-            }
-            else {
+            } else {
                 //Used to flip between placing a shot on the left or right of the ship
                 boolean flip = true;
                 int cannonSeparationBackward = 16;
@@ -502,7 +492,7 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
      * Set speed to highest possible value
      * Essentially using all sails on the ship
      */
-    public void setSpeedMax(){
+    public void setSpeedMax() {
         sailState = MAX_SPEED;
     }
 
@@ -510,15 +500,15 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
      * Set speed to lowest possible value
      * Essentially putting away all sails on the ship
      */
-    public void setSpeedMin(){
+    public void setSpeedMin() {
         sailState = 0;
     }
 
     /**
      * Increments the sail state.
      */
-    public void speedUp(){
-        if (sailState < MAX_SPEED){
+    public void speedUp() {
+        if (sailState < MAX_SPEED) {
             sailState++;
         }
     }
@@ -526,126 +516,177 @@ public abstract class Ship extends CollideableEntity implements Entity, Cloneabl
     /**
      * Decrements the sail state.
      */
-    public void speedDown(){
-        if (sailState > 0){
+    public void speedDown() {
+        if (sailState > 0) {
             sailState--;
         }
     }
 
-    protected void calculateAimingLines(){
+    protected void calculateAimingLines() {
 
-        float lengthX_Horizontal = (float) (cannonRange*Math.cos(Math.toRadians(rotation)));
-        float lengthY_Horizontal = (float) (cannonRange*Math.sin(Math.toRadians(rotation)));
-        float lengthX_Vertical = (float) (cannonRange*Math.cos(Math.toRadians(rotation+DEGREES_90)));
-        float lengthY_Vertical = (float) (cannonRange*Math.sin(Math.toRadians(rotation+DEGREES_90)));
+        float lengthX_Horizontal = (float) (cannonRange * Math.cos(Math.toRadians(rotation)));
+        float lengthY_Horizontal = (float) (cannonRange * Math.sin(Math.toRadians(rotation)));
+        float lengthX_Vertical = (float) (cannonRange * Math.cos(Math.toRadians(rotation + DEGREES_90)));
+        float lengthY_Vertical = (float) (cannonRange * Math.sin(Math.toRadians(rotation + DEGREES_90)));
 
         rightAimingLine.set(
                 getCenterPosition(),
-                getCenterX()+lengthX_Horizontal,
-                getCenterY()+lengthY_Horizontal
+                getCenterX() + lengthX_Horizontal,
+                getCenterY() + lengthY_Horizontal
         );
         leftAimingLine.set(
                 getCenterPosition(),
-                getCenterX()-lengthX_Horizontal,
-                getCenterY()-lengthY_Horizontal
+                getCenterX() - lengthX_Horizontal,
+                getCenterY() - lengthY_Horizontal
         );
         forwardAimingLine.set(
                 getCenterPosition(),
-                getCenterX()+lengthX_Vertical,
-                getCenterY()+lengthY_Vertical
+                getCenterX() + lengthX_Vertical,
+                getCenterY() + lengthY_Vertical
         );
         backwardAimingLine.set(
                 getCenterPosition(),
-                getCenterX()-lengthX_Vertical,
-                getCenterY()-lengthY_Vertical
+                getCenterX() - lengthX_Vertical,
+                getCenterY() - lengthY_Vertical
         );
 
     }
+
     /**
      * Sets the direction of the ship.
+     *
      * @param dir Parameter must be Direction enum of either LEFT, RIGHT or CENTER.
      */
-    public void setDirection(Direction dir){
+    public void setDirection(Direction dir) {
         this.dir = dir;
     }
 
-    public void damageHull(float damage){this.hull -= damage;}
+    public void damageHull(float damage) {
+        this.hull -= damage;
+    }
 
-    public void damageSail(float damage){this.sails -= damage;}
+    public void damageSail(float damage) {
+        this.sails -= damage;
+    }
 
-    public void damageCrew(float damage){this.crew -= damage;}
+    public void damageCrew(float damage) {
+        this.crew -= damage;
+    }
 
-    public void setHull(float hull){this.hull = hull;}
+    public void setHull(float hull) {
+        this.hull = hull;
+    }
 
-    public void setSail(float sail){this.sails = sail;}
+    public void setSail(float sail) {
+        this.sails = sail;
+    }
 
-    public Array<CannonShot> getCannonShots(){return cannonShots;}
+    public Array<CannonShot> getCannonShots() {
+        return cannonShots;
+    }
 
     @Override
-    public Rectangle getHitBox(){return sprite.getBoundingRectangle();}
+    public Rectangle getHitBox() {
+        return sprite.getBoundingRectangle();
+    }
 
-    public float getRotation(){return rotation; }
+    public float getRotation() {
+        return rotation;
+    }
 
     @Override
-    public Sprite getSprite(){return sprite;}
+    public Sprite getSprite() {
+        return sprite;
+    }
+
     /**
      * Gets the position of the ship based on the image of the ship (the lower left corner)
+     *
      * @return The position of the ship based on the image of the ship.
      */
     @Override
-    public Vector2 getPosition(){return new Vector2(x, y);}
+    public Vector2 getPosition() {
+        return new Vector2(x, y);
+    }
 
     /**
      * Gives the ship's center position. Calculated based on the ship's image width and height.
+     *
      * @return Ship's center
      */
     @Override
-    public Vector2 getCenterPosition(){return new Vector2(x+sprite.getWidth()/2,y+sprite.getHeight()/2);}
+    public Vector2 getCenterPosition() {
+        return new Vector2(x + sprite.getWidth() / 2, y + sprite.getHeight() / 2);
+    }
+
     /**
      * Gives a point in front of the ship from a predetermined distance {@code HOW_FAR_FROM_SHIP}
      * 90 Degrees is added to the original computation to make 0 degrees North of the Ship
+     *
      * @return The position in front of the ship
      */
-    public Vector2 getPositionFrontOfShip(){
+    public Vector2 getPositionFrontOfShip() {
         final int HOW_FAR_FROM_SHIP = 100;
-        return new Vector2( (float) (x+(HOW_FAR_FROM_SHIP*Math.cos((Math.toRadians(rotation+90))))),
-                            (float) (y+(HOW_FAR_FROM_SHIP*Math.sin((Math.toRadians(rotation+90)))))
+        return new Vector2((float) (x + (HOW_FAR_FROM_SHIP * Math.cos((Math.toRadians(rotation + 90))))),
+                (float) (y + (HOW_FAR_FROM_SHIP * Math.sin((Math.toRadians(rotation + 90)))))
         );
     }
+
     @Override
-    public float getX(){return x;}
+    public float getX() {
+        return x;
+    }
+
     @Override
-    public float getY(){return y;}
+    public float getY() {
+        return y;
+    }
 
     /**
      * Gives the ship's x based on where the center of the ship's image is located.
+     *
      * @return the Ship's x that is in the center of the ship.
      */
     @Override
-    public float getCenterX(){return x+sprite.getWidth()/2;}
+    public float getCenterX() {
+        return x + sprite.getWidth() / 2;
+    }
 
     /**
      * Gives the ship's y based on where the center of the ship's image is located.
+     *
      * @return the Ship's y that is in the center of the ship.
      */
     @Override
-    public float getCenterY(){return y+sprite.getHeight()/2;}
+    public float getCenterY() {
+        return y + sprite.getHeight() / 2;
+    }
 
-    public float getCannonRange(){return cannonRange;}
+    public float getCannonRange() {
+        return cannonRange;
+    }
 
-    public float getHull(){return hull;}
+    public float getHull() {
+        return hull;
+    }
 
-    public float getSails(){return sails;}
+    public float getSails() {
+        return sails;
+    }
 
-    public boolean isDead(){return dead;}
+    public boolean isDead() {
+        return dead;
+    }
 
-    public boolean isDisposable(){return disposable;}
+    public boolean isDisposable() {
+        return disposable;
+    }
 
     /**
      * Disposes all textures that the given ship uses. Should never be called on player directly, as textures should remain between battles.
      */
     @Override
-    public void disposeTextures(){
+    public void disposeTextures() {
         sprite.getTexture().dispose();
         smoke.getTexture().dispose();
     }
