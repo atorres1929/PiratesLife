@@ -22,8 +22,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ships.Brigantine;
-import info.datahelix.apirateslife.entity.Ships.Gunboat;
+import info.datahelix.apirateslife.entity.Ships.Player_Ships.Brigantine;
 import info.datahelix.apirateslife.screens.BattleWorld;
 import info.datahelix.apirateslife.screens.Splash;
 import info.datahelix.apirateslife.utils.Utils;

@@ -34,7 +34,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import info.datahelix.apirateslife.entity.Player;
-import info.datahelix.apirateslife.entity.Ships.Gunboat;
+import info.datahelix.apirateslife.entity.Ships.Player_Ships.Gunboat;
 import info.datahelix.apirateslife.utils.Utils;
 
 /**

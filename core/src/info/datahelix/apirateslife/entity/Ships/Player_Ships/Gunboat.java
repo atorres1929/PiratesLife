@@ -15,11 +15,12 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package info.datahelix.apirateslife.entity.Ships;
+package info.datahelix.apirateslife.entity.Ships.Player_Ships;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
 
 /**
@@ -28,13 +29,12 @@ import info.datahelix.apirateslife.item.CannonType;
  * @author Adam Torres
  */
 
-public class Brigantine extends Ship {
-    public Brigantine(String name, float x, float y, float rotation) {
-        super(name, new Sprite(new Texture("ships/brigantine.png")),
+public class Gunboat extends Player_Ship {
+    public Gunboat(String name, float x, float y, float rotation) {
+        super(name, new Sprite(new Texture("ships/gunboat.png")),
                 x, y, rotation,
-                4, 1, 1,
-                new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.LONG_CANNON),
-                20, 200, 120, 3,
-                20);
+                1, 0, 0, new CannonType(CannonType.CannonWeightType.TWELVE_POUNDER, CannonType.CannonRangeType.SHORT_CANNON),
+                10, 100, 70, 5,
+                10);
     }
 }

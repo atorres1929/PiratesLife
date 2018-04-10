@@ -22,7 +22,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 
 import info.datahelix.apirateslife.entity.Ships.Ship;
 import info.datahelix.apirateslife.item.CannonType;
